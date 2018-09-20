@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Src\FileManager\FileManager.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager\FileManagerWebUI.csproj" />
   </ItemGroup>
 
 </Project>

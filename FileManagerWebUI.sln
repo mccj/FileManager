@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileManagerTest", "Test\FileManagerTest\FileManagerTest.csproj", "{397A5C27-F043-4CD6-9D91-522325158816}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileManager", "Src\FileManager\FileManager.csproj", "{6131038C-2A4D-4B27-B8A9-10086B022BE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileManagerWebUI", "Src\FileManager\FileManagerWebUI.csproj", "{6131038C-2A4D-4B27-B8A9-10086B022BE8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCoreDashboard", "Src\AspNetCoreDashboard\AspNetCoreDashboard.csproj", "{2A8DC475-FEAC-4AE5-9453-991EB811781D}"
 EndProject

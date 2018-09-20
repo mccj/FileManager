@@ -68,9 +68,9 @@
       <Project>{2A8DC475-FEAC-4AE5-9453-991EB811781D}</Project>
       <Name>AspNetCoreDashboard</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Src\FileManager\FileManager.csproj">
+    <ProjectReference Include="..\..\Src\FileManager\FileManagerWebUI.csproj">
       <Project>{6131038c-2a4d-4b27-b8a9-10086b022be8}</Project>
-      <Name>FileManager</Name>
+      <Name>FileManagerWebUI</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
