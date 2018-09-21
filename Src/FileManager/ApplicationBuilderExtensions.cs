@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 #if !NETFULL
+using Microsoft.Extensions.DependencyInjection;
 using IAppBuilder = Microsoft.AspNetCore.Builder.IApplicationBuilder;
 #else
 using IAppBuilder= Owin.IAppBuilder;
@@ -20,7 +21,7 @@ namespace FileManager
     {
         public static IAppBuilder UseFileManager(this IAppBuilder app,
             string pathMatch,
-            string webRootPath,
+            string webRootPath = null,
             string webPath = "",
             bool publicPath = false,
             string[] allowedExtensions = null,
@@ -28,7 +29,15 @@ namespace FileManager
         {
             if (app == null) throw new ArgumentNullException(nameof(app));
             if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
-
+            if (string.IsNullOrWhiteSpace(webRootPath))
+            {
+#if !NETFULL
+                var env = app.ApplicationServices.GetService<Microsoft.AspNetCore.Hosting.IHostingEnvironment>();
+                webRootPath = env.WebRootPath;
+#else
+                webRootPath=Environment.CurrentDirectory;
+#endif
+            }
             var Provider = new PhysicalFileManagerProvider(webRootPath, webPath, publicPath, allowedExtensions);
             app.UseFileManager(pathMatch, Provider, authorization);
             return app;
@@ -151,7 +160,8 @@ namespace FileManager
         }
         private static string GetContentFolderNamespace(string contentFolder)
         {
-            return $"{typeof(ApplicationBuilderExtensions).Namespace}.Content.{contentFolder}";
+            var assemblyName = "FileManagerWebUI";//typeof(ApplicationBuilderExtensions).Namespace
+            return $"{assemblyName}.Content.{contentFolder}";
         }
     }
 }

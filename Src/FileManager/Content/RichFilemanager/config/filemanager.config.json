@@ -24,7 +24,7 @@
         ]
     },
     "language": {
-        "default": "en",
+        "default": "zh-CN",
         "available": ["ar", "bs", "ca", "cs", "da", "de", "el", "en", "es", "fa", "fi", "fr", "he", "hu", "it", "ja", "nl", "pl", "pt", "ru", "sv", "th", "tr", "vi", "zh-CN", "zh-TW"]
     },
     "formatter": {
@@ -92,7 +92,7 @@
             "enabled": true,
             "lazyLoad": true,
             "showThumbs": true,
-            "thumbMaxWidth": 64,
+            "thumbMaxWidth": 180,
             "extensions": [
                 "jpg",
                 "jpe",

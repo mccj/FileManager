@@ -11,7 +11,7 @@
 //{
 //#if !NETFULL
 
-//    public class PhysicalFileManagerProvider11 : IFileManagerProvider
+//    public class FileManagerProvider : IFileManagerProvider
 //    {
 //        //private readonly FileExtensionContentTypeProvider fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
 
@@ -22,7 +22,7 @@
 //        private readonly string[] _allowedExtensions;
 //        //private string[] imgExtensions = new string[] { ".jpg", ".png", ".jpeg", ".gif", ".bmp" }; // Only allow this image extensions. [string]
 
-//        public PhysicalFileManagerProvider11(Microsoft.Extensions.FileProviders.IFileProvider fileProvider, string webRootPath, string webPath = null, bool publicPath = false, string[] allowedExtensions = null)
+//        public FileManagerProvider(Microsoft.Extensions.FileProviders.IFileProvider fileProvider, string webRootPath, string webPath = null, bool publicPath = false, string[] allowedExtensions = null)
 //        {
 //            _fileProvider = fileProvider;
 //            // FileManager Content Folder

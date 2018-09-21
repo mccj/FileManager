@@ -46,7 +46,7 @@ namespace FileManagerTest
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            app.UseFileManager("/hangfire", "D:\\test\\ContentLibrary");
+            app.UseFileManager("/hangfire"/*, "D:\\test\\ContentLibrary"*/);
 
             app.UseMvc();
         }
