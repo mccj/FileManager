@@ -46,8 +46,12 @@ namespace FileManagerTest
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            app.UseFileManager("/hangfire"/*, "D:\\test\\ContentLibrary"*/);
 
+            //app.UseFileManager("/hangfire"/*, "D:\\test\\ContentLibrary"*/);
+
+            //app.UseFileManager("/hangfire", "D:\\test\\ContentLibrary");
+            app.UseFileManagerForFtp("/hangfire", "ftp://10.11.1.15/",21,"admin","admin"/*, "D:\\test\\ContentLibrary"*/);
+            
             app.UseMvc();
         }
     }

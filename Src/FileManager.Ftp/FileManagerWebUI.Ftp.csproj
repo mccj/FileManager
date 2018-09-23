@@ -26,24 +26,15 @@
   </ItemGroup>
 
 
+
   <ItemGroup>
-    <Compile Remove="Content\RichFilemanager\**" />
-    <EmbeddedResource Include="Content\RichFilemanager\**" />
-    <!--<None Remove="Content\RichFilemanager\**" />-->
+    <PackageReference Include="FluentFTP" Version="19.2.2" />
   </ItemGroup>
 
 
-  <ItemGroup>
-    <Compile Remove="FileStore\FileSystemStore.cs" />
-  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0005" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\AspNetCoreDashboard\AspNetCoreDashboard.csproj" />
+    <ProjectReference Include="..\FileManager\FileManagerWebUI.csproj" />
   </ItemGroup>
 
 </Project>
