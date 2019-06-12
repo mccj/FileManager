@@ -92,33 +92,35 @@ namespace FileManager
             if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
             if (routes == null) throw new ArgumentNullException(nameof(routes));
 
-            app.UseMapDashboard(pathMatch, authorization, routes);
+            app.UseMapDashboard(pathMatch,  routes, authorization);
             return app;
         }
         private static void initRoute(RouteCollection routes, IFileManagerProvider fileManagerProvider)
         {
             var controller = new FileManagerController(fileManagerProvider);
-
+            var assembly = GetExecutingAssembly();
             //application/json
             //text/html
             //application/javascript
             //text/css
+            //routes.AddCommand("", context=> { context.Response.r});
+            routes.Add("", new RedirectDispatcher((uriMatch) => uriMatch.Value + "/"));
             routes.Add("/", new EmbeddedResourceDispatcher(System.Net.Mime.MediaTypeNames.Text.Html, GetExecutingAssembly(), GetContentResourceName("RichFilemanager", "index.html")));
             //routes.Add("/js[0-9]+", new CombinedResourceDispatcher("application/javascript", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager/js"), new[] { "" }));
             //routes.Add("/css[0-9]+", new CombinedResourceDispatcher("text/css", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager/js"), new[] { "" }));
-            routes.AddEmbeddedResource("/src/css/(?<path>.+\\.css)", "text/css", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.src.css"));
-            routes.AddEmbeddedResource("/src/js/(?<path>.+\\.js)", "application/javascript", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.src.js"));
-            routes.AddEmbeddedResource("/src/templates/(?<path>.+\\.html)", System.Net.Mime.MediaTypeNames.Text.Html, GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.src.templates"));
-            routes.AddEmbeddedResource("/languages/(?<path>.+\\.json)", "application/json", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.languages"));
-            routes.AddEmbeddedResource("/images/(?<path>.+\\.png)", "image/png", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.images"));
-            routes.AddEmbeddedResource("/images/(?<path>.+\\.gif)", System.Net.Mime.MediaTypeNames.Image.Gif, GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.images"));
-            routes.AddEmbeddedResource("/libs/(?<path>.+\\.json)", "application/json", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.libs"));
-            routes.AddEmbeddedResource("/libs/(?<path>.+\\.js)", "application/javascript", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.libs"));
-            routes.AddEmbeddedResource("/libs/(?<path>.+\\.css)", "text/css", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.libs"));
-            routes.AddEmbeddedResource("/libs/(?<path>.+\\.png)", "image/png", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.libs"));
-            routes.AddEmbeddedResource("/libs/(?<path>.+\\.gif)", "image/gif", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.libs"));
-            routes.AddEmbeddedResource("/themes/(?<path>.+\\.css)", "text/css", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.themes"));
-            routes.AddEmbeddedResource("/themes/(?<path>.+\\.png)", "image/png", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager.themes"));
+            routes.AddEmbeddedResource(assembly,"/src/css/(?<path>.+\\.css)", "text/css",  GetContentFolderNamespace("RichFilemanager.src.css"));
+            routes.AddEmbeddedResource(assembly, "/src/js/(?<path>.+\\.js)", "application/javascript",  GetContentFolderNamespace("RichFilemanager.src.js"));
+            routes.AddEmbeddedResource(assembly, "/src/templates/(?<path>.+\\.html)", System.Net.Mime.MediaTypeNames.Text.Html,  GetContentFolderNamespace("RichFilemanager.src.templates"));
+            routes.AddEmbeddedResource(assembly, "/languages/(?<path>.+\\.json)", "application/json",  GetContentFolderNamespace("RichFilemanager.languages"));
+            routes.AddEmbeddedResource(assembly, "/images/(?<path>.+\\.png)", "image/png",  GetContentFolderNamespace("RichFilemanager.images"));
+            routes.AddEmbeddedResource(assembly, "/images/(?<path>.+\\.gif)", System.Net.Mime.MediaTypeNames.Image.Gif,  GetContentFolderNamespace("RichFilemanager.images"));
+            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.json)", "application/json",  GetContentFolderNamespace("RichFilemanager.libs"));
+            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.js)", "application/javascript",  GetContentFolderNamespace("RichFilemanager.libs"));
+            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.css)", "text/css",  GetContentFolderNamespace("RichFilemanager.libs"));
+            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.png)", "image/png",  GetContentFolderNamespace("RichFilemanager.libs"));
+            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.gif)", "image/gif",  GetContentFolderNamespace("RichFilemanager.libs"));
+            routes.AddEmbeddedResource(assembly, "/themes/(?<path>.+\\.css)", "text/css",  GetContentFolderNamespace("RichFilemanager.themes"));
+            routes.AddEmbeddedResource(assembly, "/themes/(?<path>.+\\.png)", "image/png",  GetContentFolderNamespace("RichFilemanager.themes"));
 
             routes.Add("/config/filemanager.init.js", new EmbeddedResourceDispatcher("application/javascript", GetExecutingAssembly(), GetContentResourceName("RichFilemanager.config", "filemanager.init.js")));
             routes.Add("/config/filemanager.config.json", new EmbeddedResourceDispatcher("application/json", GetExecutingAssembly(), GetContentResourceName("RichFilemanager.config", "filemanager.config.json")));

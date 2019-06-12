@@ -239,63 +239,66 @@ namespace FileManager
             }
         }
 #if !NETFULL
-        public async Task<Result<List<ResultInfo>>> Upload(string path, IEnumerable<Microsoft.AspNetCore.Http.IFormFile> files)
+        public Task<Result<List<ResultInfo>>> Upload(string path, IEnumerable<Microsoft.AspNetCore.Http.IFormFile> files)
         {
-            var result = new Result<List<ResultInfo>> { Data = new List<ResultInfo>() };
-
-            foreach (var file in files)
+            return Task.Run(() =>
             {
-                if (file.Length <= 0) continue;
+                var result = new Result<List<ResultInfo>> { Data = new List<ResultInfo>() };
 
-                var fileExist = _fileStore.FileExists(Path.Combine(_webRootPath, path, file.FileName));
-
-                if (fileExist)
+                foreach (var file in files)
                 {
-                    var errorResult = new Result<List<ResultInfo>> { Errors = new List<Error>() };
+                    if (file.Length <= 0) continue;
 
-                    errorResult.Errors.Add(new Error
+                    var fileExist = _fileStore.FileExists(Path.Combine(_webRootPath, path, file.FileName));
+
+                    if (fileExist)
                     {
-                        Code = 500,
-                        Title = "FILE_ALREADY_EXISTS",
-                        Meta = new Meta
+                        var errorResult = new Result<List<ResultInfo>> { Errors = new List<Error>() };
+
+                        errorResult.Errors.Add(new Error
                         {
-                            Arguments = new List<string>
+                            Code = 500,
+                            Title = "FILE_ALREADY_EXISTS",
+                            Meta = new Meta
+                            {
+                                Arguments = new List<string>
                             {
                                 file.FileName
                             }
+                            }
+                        });
+
+                        return errorResult;
+                    }
+
+                    var _path = Path.Combine(_webRootPath, path, file.FileName);
+                    using (var stream = file.OpenReadStream())
+                    {
+                        _fileStore.CreateFileFromStream(_path, stream).Wait();
+                    }
+
+                    É¾³ýËõÂÔÍ¼(_path);
+                    result.Data.Add(new ResultInfo
+                    {
+                        Id = MakeWebPath(Path.Combine(path, file.FileName)),
+                        Type = InfoType.file,
+                        Attributes = new Attributes
+                        {
+                            Name = file.FileName,
+                            Extension = Path.GetExtension(file.FileName).Replace(".", ""),
+                            Path = getPath(() => MakeWebPath(Path.Combine(_webPath, path, file.FileName), true)),
+                            Readable = true,
+                            Writable = true,
+                            Created = /*GetUnixTimestamp*/(DateTime.Now),
+                            Modified = /*GetUnixTimestamp*/(DateTime.Now),
+                            Size = file.Length
                         }
                     });
 
-                    return errorResult;
                 }
 
-                var _path = Path.Combine(_webRootPath, path, file.FileName);
-                using (var stream = file.OpenReadStream())
-                {
-                    _fileStore.CreateFileFromStream(_path, stream).Wait();
-                }
-
-                É¾³ýËõÂÔÍ¼(_path);
-                result.Data.Add(new ResultInfo
-                {
-                    Id = MakeWebPath(Path.Combine(path, file.FileName)),
-                    Type = InfoType.file,
-                    Attributes = new Attributes
-                    {
-                        Name = file.FileName,
-                        Extension = Path.GetExtension(file.FileName).Replace(".", ""),
-                        Path = getPath(() => MakeWebPath(Path.Combine(_webPath, path, file.FileName), true)),
-                        Readable = true,
-                        Writable = true,
-                        Created = /*GetUnixTimestamp*/(DateTime.Now),
-                        Modified = /*GetUnixTimestamp*/(DateTime.Now),
-                        Size = file.Length
-                    }
-                });
-
-            }
-
-            return result;
+                return result;
+            });
         }
 #else
 #endif
