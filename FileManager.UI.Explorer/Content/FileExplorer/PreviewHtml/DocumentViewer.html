@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Document Viewer</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="../Resource/viewer.css" rel="stylesheet">
+    <script src="../Resource/viewer.js"></script>
+
+</head>
+<body>
+    <span class="dv-scope">
+        <div id="documentViewer" class="dv-control dv-controlFull"></div>
+    </span>
+    <script type="text/javascript" id="documentViewer-loader">
+        (function () {
+            var config = {
+                id: "documentViewer",
+                resizable: false,
+                resizeHandles: "s, e, se",
+                displayMode: "Viewport",
+                stateId: "dlace3",
+                path: "../Resource/webviewer",
+                handlerUrl: "../DocumentViewer",
+                cacheInfoKey: "z03xrq/z03xrq-1rv5896.json",
+                firstTime: false,
+                language: "cn",
+                languageUrl: "../../localization.json?display=__lng__",
+                fitMode: "FitWidth",
+                layoutMode: "Continuous",
+                zoomLevel: 100,
+                searchOptions: {
+                    highlightColor: [
+                        255,
+                        255,
+                        0,
+                        255
+                    ],
+                    activeHighlightColor: [
+                        255,
+                        165,
+                        0,
+                        255
+                    ]
+                },
+                printOptions: {
+                    highQuality: true,
+                    highQualityLevel: 100,
+                    pageRange: ""
+                },
+                mobileMode: "OnAny",
+                custom: "{\"permissions\":262143,\"showToolbar\":true,\"showSidePane\":true,\"singlePageRotation\":false,\"downloadUrl\":\"filemanager.ashx/Download?stateId=1p4rrzv&path=%5b1.+Root+Folder%5d%3a%5c&openInBrowser=false&fileName=PDF+Sample+File.pdf\",\"downloadAsPdfUrl\":\"documentviewer.ashx/DownloadAsPdf?stateId=dlace3&cacheInfoKey=z03xrq/z03xrq-1rv5896.json\"}",
+                clientEvents: {}
+            };
+            if (window.loaderReady)
+                window.loaderReady(config);
+            else {
+                window.loaderQueue = window.loaderQueue || [];
+                window.loaderQueue.push(config);
+            }
+        })();
+    </script>
+</body>
+</html>

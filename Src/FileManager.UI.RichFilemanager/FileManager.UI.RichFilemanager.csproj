@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;</TargetFrameworks>
+    <Version>1.0.0-beta2</Version>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <DefineConstants>TRACE;NETSTANDARD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|NET46|AnyCPU'">
+    <DefineConstants>TRACE;NETFULL</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0005" />
+    <PackageReference Include="AspNetCoreDashboard" Version="1.0.0-beta-1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Content\RichFilemanager\**" />
+    <EmbeddedResource Include="Content\RichFilemanager\**" />
+    <!--<None Remove="Content\RichFilemanager\**" />-->
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FileManager.UI.Core\FileManager.UI.Core.csproj" />
+  </ItemGroup>
+</Project>

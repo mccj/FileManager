@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FileManager.Storage\FileManager.Storage.csproj" />
+    <ProjectReference Include="..\FileManager.UI.Core\FileManager.UI.Core.csproj" />
+    <PackageReference Include="sharpcompress" Version="0.24.0" />
+  </ItemGroup>
+
+</Project>

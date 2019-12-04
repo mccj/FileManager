@@ -9,7 +9,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Src\FileManager.Ftp\FileManagerWebUI.Ftp.csproj" />
+    <ProjectReference Include="..\..\FileManager.UI.Explorer\FileManager.UI.Explorer.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Compress\FileManager.Storage.Compress.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Ftp\FileManager.Storage.Ftp.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.WebDav\FileManager.Storage.WebDav.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.Core\FileManager.UI.Core.csproj" />
   </ItemGroup>
 
 </Project>

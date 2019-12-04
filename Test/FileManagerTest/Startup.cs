@@ -12,7 +12,7 @@ namespace FileManagerTest
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+               Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -26,9 +26,17 @@ namespace FileManagerTest
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddFileManager(f => f
+            //.AddWebRootFileProviderReadOnly()
+            //.AddFileProviderRootPhysicalPathReadOnly("/bin")
+            //.AddFileProviderPhysicalPathReadOnly("d://")
+            //.AddRootPhysicalFilePath("/bin")
+            .AddPhysicalFilePath("d://")
+            //.AddFtpStore("ftp://10.11.1.15/", 21, "mccj", "`1q2w3e4r")
+            //.AddWebDavStore(new System.Uri("http://10.11.11.11/remote.php/webdav/"), "mccj", "`1q2w3e4r")
+            //.AddCompressStore(System.IO.File.OpenRead(@"D:\Users\mccj\Source\Repos\FileManager\Test\FileManagerTest\wwwroot\AspNetCore-2.2.6.zip"))
+            );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,12 +54,19 @@ namespace FileManagerTest
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
+            app.UseFileManagerUI("/Browser", f => f
+                 //.UseDefaultFileManagerUI()
+                 .UseFileExplorerUI()
+            );
 
+            //app.UseFileManagerUI("/RichFileManagerBrowser", f => f
+            //    .UseRichFileManagerUI()
+            //);
             //app.UseFileManager("/hangfire"/*, "D:\\test\\ContentLibrary"*/);
 
             //app.UseFileManager("/hangfire", "D:\\test\\ContentLibrary");
-            app.UseFileManagerForFtp("/hangfire", "ftp://10.11.1.15/",21,"admin","admin"/*, "D:\\test\\ContentLibrary"*/);
-            
+            //app.UseFileManagerForFtp("/hangfire", "ftp://10.11.1.15/",21,"admin","admin"/*, "D:\\test\\ContentLibrary"*/);
+
             app.UseMvc();
         }
     }

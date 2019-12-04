@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;</TargetFrameworks>
+    <Version>1.0.0-beta2</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="FtpStore.CoreFtp\**" />
+    <EmbeddedResource Remove="FtpStore.CoreFtp\**" />
+    <None Remove="FtpStore.CoreFtp\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentFTP" Version="28.0.2" />
+    <!--<PackageReference Include="Ftp.dll" Version="2.0.19002.942" />-->
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FileManager.Storage\FileManager.Storage.csproj" />
+    <ProjectReference Include="..\FileManager.UI.Core\FileManager.UI.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Document Viewer</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="/filevista/resource.ashx/608143281960000000/du/viewer.css" rel="stylesheet">
+    <script src="/filevista/resource.ashx/608143281960000000/du/viewer.js"></script>
+
+</head>
+<body>
+    <!--
+    DocumentUltimate
+    Copyright © 2016-2019 GleamTech
+    https://www.gleamtech.com/documentultimate
+    -->
+    <span class="dv-scope"><div id="documentViewer" class="dv-control dv-controlFull"></div></span>
+    <script type="text/javascript" id="documentViewer-loader">
+        (function () {
+            var config = {
+                id: "documentViewer",
+                resizable: false,
+                resizeHandles: "s, e, se",
+                displayMode: "Viewport",
+                stateId: "dlace3",
+                path: "/filevista/resource.ashx/608143281960000000/du/webviewer",
+                handlerUrl: "/filevista/documentviewer.ashx",
+                cacheInfoKey: "z03xrq/z03xrq-1rv5896.json",
+                firstTime: false,
+                language: "en",
+                languageUrl: "/filevista/resource.ashx/608143281960000000/du/localization.json?display=__lng__",
+                fitMode: "FitWidth",
+                layoutMode: "Continuous",
+                zoomLevel: 100,
+                searchOptions: {
+                    highlightColor: [
+                        255,
+                        255,
+                        0,
+                        255
+                    ],
+                    activeHighlightColor: [
+                        255,
+                        165,
+                        0,
+                        255
+                    ]
+                },
+                printOptions: {
+                    highQuality: true,
+                    highQualityLevel: 100,
+                    pageRange: ""
+                },
+                mobileMode: "OnAny",
+                custom: "{\"permissions\":262143,\"showToolbar\":true,\"showSidePane\":true,\"singlePageRotation\":false,\"downloadUrl\":\"/filevista/filemanager.ashx/Download?stateId=1p4rrzv&path=%5b1.+Root+Folder%5d%3a%5c&openInBrowser=false&fileName=PDF+Sample+File.pdf\",\"downloadAsPdfUrl\":\"/filevista/documentviewer.ashx/DownloadAsPdf?stateId=dlace3&cacheInfoKey=z03xrq/z03xrq-1rv5896.json\"}",
+                clientEvents: {}
+            };
+            if (window.loaderReady)
+                window.loaderReady(config);
+            else {
+                window.loaderQueue = window.loaderQueue || [];
+                window.loaderQueue.push(config);
+            }
+        })();
+    </script>
+
+</body>
+</html>

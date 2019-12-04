@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        FileExplorer
+    </title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10, user-scalable=yes">
+    <link href="Resource/library/ext/theme-gray/all1.css" rel="stylesheet">
+    <link href="Resource/library/ext/theme-gray/all2.css" rel="stylesheet">
+    <link href="Resource/css/fileultimate.css" rel="stylesheet">
+    <script src="Resource/library/ext.js"></script>
+    <script src="Resource/js/fileultimate.js"></script>
+    <script src="localization?display=cn&amp;format=zh-CHS" charset="utf-8"></script>
+</head>
+<body>
+    <script type="text/javascript" id="fileManager-loader">
+        (function () {
+            var config = {
+                id: "fileManager",
+                xclass: "GleamTech.FileUltimate.FileManager",
+                resizable: false,
+                resizeHandles: "s, e, se",
+                displayMode: "Viewport",
+                stateId: "1p4rrzv",
+                handlerUrl: "Filemanager",
+                resourceBasePath: "Resource/",
+                hash: "d1e313719cb4cd2d47521f47fc8766ba",
+                viewLayout: "LargeIcons",
+                clientEvents: {
+                    //loading: "fileManagerLoading",
+                    //loaded: "fileManagerLoaded"
+                },
+                rootFolders: [
+                    [
+                        "Root",
+                        1073774591,
+                        "*/",
+                        true,
+                        "defae9a5716c7a48e47edd1497fb3173"
+                    ]
+                    //[
+                    //  "2. Feature Tests",
+                    //  26755,
+                    //  "*/",
+                    //  true,
+                    //  "defae9a5716c7a48e47edd1497fb3173"
+                    //],
+                    //[
+                    //    "1. Root Folder",
+                    //    1073774591,
+                    //    "*/",
+                    //    true,
+                    //    "233427db0aa8c026002f7a3fce1b78a5"
+                    //],
+                    //[
+                    //    "3. Another Root Folder",
+                    //    1073774591,
+                    //    "*/",
+                    //    true,
+                    //    "c43b9612db65acdb41f9b9e96a88ac9d"
+                    //]
+                ],
+                fileUploaderConfig: {
+                    id: "fileManager-fileUploader",
+                    xclass: "GleamTech.FileUltimate.FileUploader",
+                    resizable: true,
+                    resizeHandles: "s, e, se",
+                    displayMode: "Window",
+                    windowOptions: {
+                        modal: true,
+                        maximizable: true,
+                        resizeHandles: "all"
+                    },
+                    stateId: "1m7ffzd",
+                    handlerUrl: "Fileuploader",
+                    resourceBasePath: "Resource/",
+                    hash: "2b475fb4063e3443fa89cec47487c9cf",
+                    clientEvents: {},
+                    methods: "Html5,Silverlight,Flash,Html4",
+                    viewLayout: "LargeIcons",
+                    fileTypes: "*/",
+                    chunkSize: "4 MB",
+                    autoClose: true
+                }
+            };
+            if (window.loaderReady)
+                window.loaderReady(config);
+            else {
+                window.loaderQueue = window.loaderQueue || [];
+                window.loaderQueue.push(config);
+            }
+        })();
+    </script>
+</body>
+</html>
