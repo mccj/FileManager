@@ -17,8 +17,8 @@ namespace FileManager.UI.Core.Test
             //var sss2 = new ManifestEmbeddedFileProvider(typeof(UnitTest1).Assembly);
             var sss3 = new PhysicalFileProvider(@"D:\Users\mccj\Source\Repos\FileManager\FileManager\");
             var sss4 = new NullFileProvider();
-            var sss5 = new FileStorage.StoreFileProvider(new FileStorage.PhysicalFileSystemStore(@"D:\Users\mccj\Source\Repos\FileManager\FileManager\"));
-            var sss6 = new FileStorage.StoreFileProvider(new FileStorage.FileSystemStore(@"D:\Users\mccj\Source\Repos\FileManager\FileManager\"));
+            var sss5 = new FileStorage.StoreFileProvider(new FileStorage.Standard.PhysicalFileSystemStore(@"D:\Users\mccj\Source\Repos\FileManager\FileManager\"));
+            var sss6 = new FileStorage.StoreFileProvider(new FileStorage.Standard.FileSystemStore(@"D:\Users\mccj\Source\Repos\FileManager\FileManager\"));
             var sss7 = new CompositeFileProvider(sss1, sss3, sss4, sss5, sss6);
 
             var sdfsd = sss4.Watch("");

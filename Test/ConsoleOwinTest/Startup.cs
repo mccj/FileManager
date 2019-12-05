@@ -1,7 +1,7 @@
 using Microsoft.Owin;
 using Owin;
 using System.Threading.Tasks;
-using FileManager;
+//using FileManager;
 
 namespace ConsoleOwinTest
 {
@@ -9,7 +9,7 @@ namespace ConsoleOwinTest
     {
         public void Configuration(IAppBuilder appBuilder)
         {
-            appBuilder.UseFileManager("/hangfire", "D:\\test\\ContentLibrary");
+            //appBuilder.UseFileManager("/hangfire", "D:\\test\\ContentLibrary");
 
             appBuilder.Run(HandleRequest);
 
