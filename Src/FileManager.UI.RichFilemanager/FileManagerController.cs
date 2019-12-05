@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 #if !NETFULL
-using Microsoft.AspNetCore.StaticFiles;
+//using Microsoft.AspNetCore.StaticFiles;
 #else
 #endif
 namespace FileManager
@@ -12,11 +12,14 @@ namespace FileManager
     public class FileManagerController
     {
         private readonly IFileManagerProvider _fileManager;
+        private readonly FileStorage.IFileStore _fileStore;
         private readonly FileExtensionContentTypeProvider fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
 
-        public FileManagerController(IFileManagerProvider fileManager)
+        public FileManagerController(//IFileManagerProvider fileManager, 
+            FileStorage.IFileStore fileStore)
         {
-            this._fileManager = fileManager;
+            //this._fileManager = fileManager;
+            this._fileStore = fileStore;
         }
 
         public ActionResult Index(string mode, string path, string name,

@@ -10,9 +10,9 @@
     <DefineConstants>TRACE;NETFULL</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0005" />
-    <PackageReference Include="AspNetCoreDashboard" Version="1.0.0-beta-1" />
+    <PackageReference Include="AspNetCoreDashboard" Version="1.0.0-beta-8" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Content\RichFilemanager\**" />
@@ -20,6 +20,6 @@
     <!--<None Remove="Content\RichFilemanager\**" />-->
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FileManager.UI.Core\FileManager.UI.Core.csproj" />
+    <ProjectReference Include="..\FileManager.Core\FileManager.Core.csproj" />
   </ItemGroup>
 </Project>

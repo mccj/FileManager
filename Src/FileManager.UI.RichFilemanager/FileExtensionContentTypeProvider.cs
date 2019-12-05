@@ -1,7 +1,7 @@
 //using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 #if !NETFULL
-using Microsoft.AspNetCore.StaticFiles;
+//using Microsoft.AspNetCore.StaticFiles;
 #else
 #endif
 namespace FileManager

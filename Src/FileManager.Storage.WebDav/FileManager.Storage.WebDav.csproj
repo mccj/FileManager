@@ -1,21 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="FtpStore.cs" />
-    <Compile Remove="FtpStoreEntry.cs" />
-  </ItemGroup>
-
+    <TargetFrameworks>netstandard2.0;NET461</TargetFrameworks>
+    <Version>1.0.0</Version>  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WebDav.Client" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FileManager.Storage\FileManager.Storage.csproj" />
-    <ProjectReference Include="..\FileManager.UI.Core\FileManager.UI.Core.csproj" />
+    <ProjectReference Include="..\FileManager.Core\FileManager.Core.csproj" />
   </ItemGroup>
 
 </Project>

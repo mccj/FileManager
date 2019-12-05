@@ -20,23 +20,31 @@ namespace FileManager
     /// </summary>
     public static class ApplicationBuilderExtensions
     {
-        public static IAppBuilder UseFileManager(this IAppBuilder app, string pathMatch, string webRootPath = "", string webPath = "", bool publicPath = false, string[] allowedExtensions = null, IEnumerable<IDashboardAuthorizationFilter> authorization = null)
-        {
-            if (app == null) throw new ArgumentNullException(nameof(app));
-            if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
-            if (string.IsNullOrWhiteSpace(webRootPath))
-            {
-#if !NETFULL
-                var env = app.ApplicationServices.GetService<Microsoft.AspNetCore.Hosting.IHostingEnvironment>();
-                webRootPath = env.WebRootPath;
-#else
-                webRootPath = Environment.CurrentDirectory;
-#endif
-            }
-            var Provider = new FileManager.FileStorage.PhysicalFileSystemStore(webRootPath);
-            app.UseFileManager(pathMatch, Provider, "", webPath, publicPath, allowedExtensions, authorization);
-            return app;
-        }
+        //public static void UseRichFileManagerUI(this FileManagerOptions app)
+        //{
+        //    app.Fun = new System.Action(() =>
+        //    {
+        //        app.ApplicationBuilder.UseFileManager(app.PathMatch);
+        //    });
+        //}
+
+        //public static IAppBuilder UseFileManager(this IAppBuilder app, string pathMatch, string webRootPath = "", string webPath = "", bool publicPath = false, string[] allowedExtensions = null, IEnumerable<IDashboardAuthorizationFilter> authorization = null)
+        //{
+        //    //            if (app == null) throw new ArgumentNullException(nameof(app));
+        //    //            if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
+        //    //            if (string.IsNullOrWhiteSpace(webRootPath))
+        //    //            {
+        //    //#if !NETFULL
+        //    //                var env = app.ApplicationServices.GetService<Microsoft.AspNetCore.Hosting.IHostingEnvironment>();
+        //    //                webRootPath = env.WebRootPath;
+        //    //#else
+        //    //                webRootPath = Environment.CurrentDirectory;
+        //    //#endif
+        //    //            }
+        //    //            var Provider = new FileManager.FileStorage.PhysicalFileSystemStore(webRootPath);
+        //    //            app.UseFileManager(pathMatch, Provider, "", webPath, publicPath, allowedExtensions, authorization);
+        //    return app;
+        //}
         //#if !NETFULL
         //        public static IAppBuilder UseFileManager(this IAppBuilder app,
         //           string pathMatch,
@@ -59,29 +67,38 @@ namespace FileManager
         //            return app;
         //        }
         //#endif
-        public static IAppBuilder UseFileManager(this IAppBuilder app, string pathMatch, IFileStore fileStore, string webRootPath = "", string webPath = "", bool publicPath = false, string[] allowedExtensions = null, IEnumerable<IDashboardAuthorizationFilter> authorization = null)
-        {
-            if (app == null) throw new ArgumentNullException(nameof(app));
-            if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
-            if (fileStore == null) throw new ArgumentNullException(nameof(fileStore));
+        //public static IAppBuilder UseFileManager(this IAppBuilder app, string pathMatch, IFileStore fileStore, string webRootPath = "", string webPath = "", bool publicPath = false, string[] allowedExtensions = null, IEnumerable<IDashboardAuthorizationFilter> authorization = null)
+        //{
+        //    //if (app == null) throw new ArgumentNullException(nameof(app));
+        //    //if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
+        //    //if (fileStore == null) throw new ArgumentNullException(nameof(fileStore));
 
-            webRootPath = webRootPath ?? "";
-            webPath = webPath ?? "";
-            var Provider = new FileManagerProvider(fileStore, webRootPath, webPath, publicPath, allowedExtensions);
-            app.UseFileManager(pathMatch, Provider, authorization);
-            return app;
+        //    //webRootPath = webRootPath ?? "";
+        //    //webPath = webPath ?? "";
+        //    //var Provider = new FileManagerProvider(fileStore, webRootPath, webPath, publicPath, allowedExtensions);
+        //    //app.UseFileManager(pathMatch, Provider, authorization);
+        //    return app;
+        //}
+        public static void UseRichFileManagerUI(this FileManagerOptions app)
+        {
+            app.Fun = new System.Action(() =>
+            {
+                app.ApplicationBuilder.UseFileManager(app.PathMatch);
+            });
         }
-        private static IAppBuilder UseFileManager(this IAppBuilder app, string pathMatch, IFileManagerProvider provider, IEnumerable<IDashboardAuthorizationFilter> authorization = null)
+        private static IAppBuilder UseFileManager(this IAppBuilder app, string pathMatch, IEnumerable<IDashboardAuthorizationFilter> authorization = null)
         {
             if (app == null) throw new ArgumentNullException(nameof(app));
             if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
-            if (provider == null) throw new ArgumentNullException(nameof(provider));
+            //if (provider == null) throw new ArgumentNullException(nameof(provider));
 
             //var services = app.ApplicationServices;
             //var options = /*options ?? services.GetService<DashboardOptions>() ??*/ new DashboardOptions() { Authorization = authorizationFilters };
             var routes = /*services.GetService<RouteCollection>()??*/ new RouteCollection();
 
-            initRoute(routes, provider);
+            //var Provider = new FileManagerProvider(fileStore, webRootPath, webPath, publicPath, allowedExtensions);
+
+            initRoute(routes, app.ApplicationServices);
             //app.Map(new PathString(pathMatch), x => x.UseMiddleware<AspNetCoreFileManagerMiddleware>(/*storage, */options, routes));
             app.UseFileManager(pathMatch, routes, authorization);
             return app;
@@ -92,12 +109,11 @@ namespace FileManager
             if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
             if (routes == null) throw new ArgumentNullException(nameof(routes));
 
-            app.UseMapDashboard(pathMatch,  routes, authorization);
+            app.UseMapDashboard(pathMatch, routes, authorization);
             return app;
         }
-        private static void initRoute(RouteCollection routes, IFileManagerProvider fileManagerProvider)
+        private static void initRoute(RouteCollection routes, IServiceProvider applicationServices)
         {
-            var controller = new FileManagerController(fileManagerProvider);
             var assembly = GetExecutingAssembly();
             //application/json
             //text/html
@@ -108,19 +124,19 @@ namespace FileManager
             routes.Add("/", new EmbeddedResourceDispatcher(System.Net.Mime.MediaTypeNames.Text.Html, GetExecutingAssembly(), GetContentResourceName("RichFilemanager", "index.html")));
             //routes.Add("/js[0-9]+", new CombinedResourceDispatcher("application/javascript", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager/js"), new[] { "" }));
             //routes.Add("/css[0-9]+", new CombinedResourceDispatcher("text/css", GetExecutingAssembly(), GetContentFolderNamespace("RichFilemanager/js"), new[] { "" }));
-            routes.AddEmbeddedResource(assembly,"/src/css/(?<path>.+\\.css)", "text/css",  GetContentFolderNamespace("RichFilemanager.src.css"));
-            routes.AddEmbeddedResource(assembly, "/src/js/(?<path>.+\\.js)", "application/javascript",  GetContentFolderNamespace("RichFilemanager.src.js"));
-            routes.AddEmbeddedResource(assembly, "/src/templates/(?<path>.+\\.html)", System.Net.Mime.MediaTypeNames.Text.Html,  GetContentFolderNamespace("RichFilemanager.src.templates"));
-            routes.AddEmbeddedResource(assembly, "/languages/(?<path>.+\\.json)", "application/json",  GetContentFolderNamespace("RichFilemanager.languages"));
-            routes.AddEmbeddedResource(assembly, "/images/(?<path>.+\\.png)", "image/png",  GetContentFolderNamespace("RichFilemanager.images"));
-            routes.AddEmbeddedResource(assembly, "/images/(?<path>.+\\.gif)", System.Net.Mime.MediaTypeNames.Image.Gif,  GetContentFolderNamespace("RichFilemanager.images"));
-            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.json)", "application/json",  GetContentFolderNamespace("RichFilemanager.libs"));
-            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.js)", "application/javascript",  GetContentFolderNamespace("RichFilemanager.libs"));
-            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.css)", "text/css",  GetContentFolderNamespace("RichFilemanager.libs"));
-            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.png)", "image/png",  GetContentFolderNamespace("RichFilemanager.libs"));
-            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.gif)", "image/gif",  GetContentFolderNamespace("RichFilemanager.libs"));
-            routes.AddEmbeddedResource(assembly, "/themes/(?<path>.+\\.css)", "text/css",  GetContentFolderNamespace("RichFilemanager.themes"));
-            routes.AddEmbeddedResource(assembly, "/themes/(?<path>.+\\.png)", "image/png",  GetContentFolderNamespace("RichFilemanager.themes"));
+            routes.AddEmbeddedResource(assembly, "/src/css/(?<path>.+\\.css)", "text/css", GetContentFolderNamespace("RichFilemanager.src.css"));
+            routes.AddEmbeddedResource(assembly, "/src/js/(?<path>.+\\.js)", "application/javascript", GetContentFolderNamespace("RichFilemanager.src.js"));
+            routes.AddEmbeddedResource(assembly, "/src/templates/(?<path>.+\\.html)", System.Net.Mime.MediaTypeNames.Text.Html, GetContentFolderNamespace("RichFilemanager.src.templates"));
+            routes.AddEmbeddedResource(assembly, "/languages/(?<path>.+\\.json)", "application/json", GetContentFolderNamespace("RichFilemanager.languages"));
+            routes.AddEmbeddedResource(assembly, "/images/(?<path>.+\\.png)", "image/png", GetContentFolderNamespace("RichFilemanager.images"));
+            routes.AddEmbeddedResource(assembly, "/images/(?<path>.+\\.gif)", System.Net.Mime.MediaTypeNames.Image.Gif, GetContentFolderNamespace("RichFilemanager.images"));
+            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.json)", "application/json", GetContentFolderNamespace("RichFilemanager.libs"));
+            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.js)", "application/javascript", GetContentFolderNamespace("RichFilemanager.libs"));
+            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.css)", "text/css", GetContentFolderNamespace("RichFilemanager.libs"));
+            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.png)", "image/png", GetContentFolderNamespace("RichFilemanager.libs"));
+            routes.AddEmbeddedResource(assembly, "/libs/(?<path>.+\\.gif)", "image/gif", GetContentFolderNamespace("RichFilemanager.libs"));
+            routes.AddEmbeddedResource(assembly, "/themes/(?<path>.+\\.css)", "text/css", GetContentFolderNamespace("RichFilemanager.themes"));
+            routes.AddEmbeddedResource(assembly, "/themes/(?<path>.+\\.png)", "image/png", GetContentFolderNamespace("RichFilemanager.themes"));
 
             routes.Add("/config/filemanager.init.js", new EmbeddedResourceDispatcher("application/javascript", GetExecutingAssembly(), GetContentResourceName("RichFilemanager.config", "filemanager.init.js")));
             routes.Add("/config/filemanager.config.json", new EmbeddedResourceDispatcher("application/json", GetExecutingAssembly(), GetContentResourceName("RichFilemanager.config", "filemanager.config.json")));
@@ -151,13 +167,16 @@ namespace FileManager
 
                //string mode, string path, string name, List<IFormFile> files, string old, string @new, string source, string target, string content, bool thumbnail, string @string
                bool.TryParse(thumbnail, out var _thumbnail);
+               var fileStore = applicationServices.GetService<FileStorage.IFileStore>();
+               var controller = new FileManagerController(fileStore);
+
                var r = controller.Index(mode, path, name,
 #if !NETFULL
-           files,
+                          files,
 #else
-           /*files,*/
+                          /*files,*/
 #endif
-           old, @new, source, target, content, _thumbnail, @string);
+                          old, @new, source, target, content, _thumbnail, @string);
 
                context.Response.ContentType = r.ContentType;
                context.Response.StatusCode = r.StatusCode;
@@ -172,12 +191,12 @@ namespace FileManager
                {
                    context.Response.WriteAsync(fileResult.FileBytes);
                }
-               return true;
+               return System.Threading.Tasks.Task.FromResult(true);
            });
         }
         private static System.Reflection.Assembly GetExecutingAssembly()
         {
-            return typeof(ApplicationBuilderExtensions).GetTypeInfo().Assembly;
+            return typeof(FileManagerController).GetTypeInfo().Assembly;
         }
         private static string GetContentResourceName(string contentFolder, string resourceName)
         {
