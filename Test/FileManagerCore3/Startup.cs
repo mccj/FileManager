@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SwaggerExtensions;
 
 #if netcoreapp3
 using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
@@ -40,11 +41,14 @@ namespace FileManagerCore3
             //.AddFileProviderRootPhysicalPathReadOnly("/bin")
             //.AddFileProviderPhysicalPathReadOnly("d://")
             //.AddRootPhysicalFilePath("/bin")
-            .AddPhysicalFilePath("d://")
+            //.AddPhysicalFilePath("d://")
+            .AddRootPhysicalFilePath("/App_Data/Files")
             //.AddFtpStore("ftp://10.11.1.15/", 21, "mccj", "`1q2w3e4r")
             //.AddWebDavStore(new System.Uri("http://10.11.11.11/remote.php/webdav/"), "mccj", "`1q2w3e4r")
             //.AddCompressStore(System.IO.File.OpenRead(@"D:\Users\mccj\Source\Repos\FileManager\Test\FileManagerTest\wwwroot\AspNetCore-2.2.6.zip"))
             );
+            services.AddNSwagSwagger();
+            services.AddHealthChecks();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,7 +63,8 @@ namespace FileManagerCore3
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseStaticFiles();
-
+            app.UseNSwagSwaggerUI();
+            app.UseHealthChecks("/health");
             app.UseFileManagerUI("/Browser", f => f
                  //.UseDefaultFileManagerUI()
                  .UseFileExplorerUI()

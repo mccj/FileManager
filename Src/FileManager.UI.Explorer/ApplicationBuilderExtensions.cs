@@ -546,10 +546,11 @@ namespace FileManager
                     {
                         var imgS = new System.Drawing.Bitmap(rr11);
                         var img = imgS.GetThumbnailImage(Math.Min(wwww, imgS.Width), Math.Min(wwww, imgS.Height), () => true, IntPtr.Zero);
+                        var ms = new System.IO.MemoryStream();
                         img.Save(context.Response.Body, System.Drawing.Imaging.ImageFormat.Png);
                         return true;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                     }
                 }
