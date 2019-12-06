@@ -35,6 +35,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileManager.UI.Core.Test", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleOwinTest", "Test\ConsoleOwinTest\ConsoleOwinTest.csproj", "{B808EEDA-19A3-4131-B938-CB7A020300F8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileManager.UI.WebApi", "Src\FileManager.UI.WebApi\FileManager.UI.WebApi.csproj", "{EBCFEF2C-7993-4656-8C34-EFA18C24F6DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,10 @@ Global
 		{B808EEDA-19A3-4131-B938-CB7A020300F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B808EEDA-19A3-4131-B938-CB7A020300F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B808EEDA-19A3-4131-B938-CB7A020300F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBCFEF2C-7993-4656-8C34-EFA18C24F6DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBCFEF2C-7993-4656-8C34-EFA18C24F6DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBCFEF2C-7993-4656-8C34-EFA18C24F6DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBCFEF2C-7993-4656-8C34-EFA18C24F6DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,6 +122,7 @@ Global
 		{80FBA605-F327-49FF-BD7B-A5366ADBF8D2} = {BF9F0A8C-B0AC-4922-B429-7F2439D6AA88}
 		{A72B7E8C-CD71-4ACC-AC8E-3B22C7DB15E1} = {BF9F0A8C-B0AC-4922-B429-7F2439D6AA88}
 		{B808EEDA-19A3-4131-B938-CB7A020300F8} = {BF9F0A8C-B0AC-4922-B429-7F2439D6AA88}
+		{EBCFEF2C-7993-4656-8C34-EFA18C24F6DC} = {AA8E05AC-9F9A-41BC-8E27-3FE5EC2CB121}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {40589E40-FE31-4BA4-9FF3-0EEF3DCFD146}

@@ -15,25 +15,25 @@ using Error = global::System.Exception;
 namespace FileManagerSdk.Models
 {
     using System = global::System;
-
-
+    
+    
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.0.27.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class UploadFileInput
+    public partial class UploadFileInput 
     {
         [Newtonsoft.Json.JsonProperty("fileBytes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public byte[] FileBytes { get; set; }
-
+    
         [Newtonsoft.Json.JsonProperty("path", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Path { get; set; }
-
-
+    
+    
     }
 
 }
 
 #pragma warning restore 1591
 #pragma warning restore 1573
-#pragma warning restore 472
-#pragma warning restore 114
-#pragma warning restore 108
+#pragma warning restore  472
+#pragma warning restore  114
+#pragma warning restore  108

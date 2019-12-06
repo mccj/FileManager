@@ -87,7 +87,6 @@ namespace FileManagerCore3
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 #endif
-
         }
     }
 }

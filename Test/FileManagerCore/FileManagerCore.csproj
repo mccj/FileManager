@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Src\FileManager.Storage.Standard\FileManager.Storage.Standard.csproj" />
     <ProjectReference Include="..\..\Src\FileManager.UI.Explorer\FileManager.UI.Explorer.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.WebApi\FileManager.UI.WebApi.csproj" />
     <ProjectReference Include="..\..\Src\FileManager.UI\FileManager.UI.csproj" />
   </ItemGroup>
 
