@@ -42,9 +42,10 @@ namespace FileManagerCore3
             //.AddFileProviderPhysicalPathReadOnly("d://")
             //.AddRootPhysicalFilePath("/bin")
             //.AddPhysicalFilePath("d://")
-            .AddRootPhysicalFilePath("/App_Data/Files")
-            //.AddFtpStore("ftp://10.11.1.15/", 21, "mccj", "`1q2w3e4r")
-            //.AddWebDavStore(new System.Uri("http://10.11.11.11/remote.php/webdav/"), "mccj", "`1q2w3e4r")
+            //.AddRootPhysicalFilePath("/App_Data/Files")
+            .AddMongoDBStore("mongodb://10.11.16.11:27017/")
+            //.AddFtpStore("ftp://10.11.1.15/", 21, "mccj", "123")
+            //.AddWebDavStore(new System.Uri("http://10.11.11.11/remote.php/webdav/"), "mccj", "123")
             //.AddCompressStore(System.IO.File.OpenRead(@"D:\Users\mccj\Source\Repos\FileManager\Test\FileManagerTest\wwwroot\AspNetCore-2.2.6.zip"))
             );
             services.AddNSwagSwagger();
@@ -66,8 +67,8 @@ namespace FileManagerCore3
             app.UseNSwagSwaggerUI();
             app.UseHealthChecks("/health");
             app.UseFileManagerUI("/Browser", f => f
-                 //.UseDefaultFileManagerUI()
-                 .UseFileExplorerUI()
+                 .UseDefaultFileManagerUI()
+                 //.UseFileExplorerUI()
             );
 
 #if netcoreapp3

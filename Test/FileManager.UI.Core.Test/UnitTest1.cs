@@ -6,7 +6,7 @@ namespace FileManager.UI.Core.Test
 {
     public class UnitTest1
     {
-        [Fact]
+        [Fact(Skip = "Ìø¹ý")]
         public void Test1()
         {
             //Microsoft.Extensions.FileProviders.Composite.CompositeDirectoryContents
@@ -61,7 +61,7 @@ namespace FileManager.UI.Core.Test
             var clientParams = new WebDav.WebDavClientParams
             {
                 BaseAddress = new Uri("http://10.11.11.11/remote.php/webdav/"),
-                Credentials = new System.Net.NetworkCredential("mccj", "`1q2w3e4r")
+                Credentials = new System.Net.NetworkCredential("mccj", "123")
             };
             var _client = new WebDav.WebDavClient(clientParams);
             var result = _client.Propfind("").Result;
@@ -70,7 +70,7 @@ namespace FileManager.UI.Core.Test
 
             var result4 = _client.Propfind("Nextcloud.mp4").Result;
             var ddddd = new WebDav.ProppatchParameters();
-            var result6 = _client.Proppatch("Nextcloud.mp4",ddddd).Result;
+            var result6 = _client.Proppatch("Nextcloud.mp4", ddddd).Result;
 
         }
     }

@@ -371,33 +371,33 @@ Since these tend to be longer than labels, they tend to be slightly easier to tr
         <Value>Upload to {0}</Value>
       </Entry>
       <Entry key="Label.UploadFiles">
-        <Value>Upload Files</Value>
+        <Value>上传文件</Value>
       </Entry>
     </EntryGroup>
     <EntryGroup key="">
       <Entry key="Message.FileConflict">
-        <Value>There is already a file with the same name in this location.</Value>
+        <Value>目标文件夹已经包含一个相同名称的文件.</Value>
       </Entry>
       <Entry key="Message.FileConflictAction">
-        <Value>Click the file you want to keep</Value>
+        <Value>点击需要保留的文件</Value>
       </Entry>
       <Entry key="Label.FileConflictReplace">
-        <Value>Replace</Value>
+        <Value>替换</Value>
       </Entry>
       <Entry key="Message.FileConflictReplace">
-        <Value>Replace the file in the destination folder with the new file:</Value>
+        <Value>用新的文件替换目标文件夹中的文件:</Value>
       </Entry>
       <Entry key="Label.FileConflictSkip">
-        <Value>Skip</Value>
+        <Value>跳过</Value>
       </Entry>
       <Entry key="Message.FileConflictSkip">
-        <Value>No files will be changed. Leave this file in the destination folder:</Value>
+        <Value>不会更改任何文件. 将此文件保留在目标文件夹中:</Value>
       </Entry>
       <Entry key="Label.FileConflictKeepBoth">
-        <Value>Keep both</Value>
+        <Value>两者都保留</Value>
       </Entry>
       <Entry key="Message.FileConflictKeepBoth">
-        <Value>The new file will be renamed:</Value>
+        <Value>新文件将被重命名:</Value>
       </Entry>
       <Entry key="Message.FileConflictSameForNext">
         <Value>Do this for the next {0} conflicts</Value>
@@ -441,13 +441,13 @@ Since these tend to be longer than labels, they tend to be slightly easier to tr
         <Value>Specific Files ({0})</Value>
       </Entry>
       <Entry key="Message.Error.SpecificUploadMethod">
-        <Value>Could not load upload method "{0}" on this browser ({1}).</Value>
+        <Value>无法在此浏览器 ({1}) 上加载上传插件 "{0}".</Value>
       </Entry>
       <Entry key="Message.Error.AnyUploadMethod">
         <Value>Could not load any of the specified upload methods "{0}" on this browser ({1}).</Value>
       </Entry>
       <Entry key="Label.UploadMethod">
-        <Value>Upload method</Value>
+        <Value>上传插件</Value>
       </Entry>
       <Entry key="Label.AddToUploadQueue">
         <Value>Add to the upload queue</Value>
@@ -456,7 +456,7 @@ Since these tend to be longer than labels, they tend to be slightly easier to tr
         <Value>Dropped item(s) are not recognized. For example this browser ({0}) may support dropping only files but not folders. If you need to drop folders, you can try with another recent browser.</Value>
       </Entry>
       <Entry key="Label.ViewInfo">
-        <Value>View info</Value>
+        <Value>查看信息</Value>
       </Entry>
       <Entry key="Label.AddConflict">
         <Value>Add Conflict</Value>
@@ -474,28 +474,28 @@ Since these tend to be longer than labels, they tend to be slightly easier to tr
         <Value>Allowed maximum file size: {0}</Value>
       </Entry>
       <Entry key="Label.UploadConflict">
-        <Value>Upload Conflict</Value>
+        <Value>上载冲突</Value>
       </Entry>
       <Entry key="Label.Column.Status">
-        <Value>Status</Value>
+        <Value>状态</Value>
       </Entry>
       <Entry key="Label.Status.Pending">
         <Value>Pending</Value>
       </Entry>
       <Entry key="Label.Status.Rejected">
-        <Value>Rejected</Value>
+        <Value>拒绝</Value>
       </Entry>
       <Entry key="Label.Status.Skipped">
-        <Value>Skipped</Value>
+        <Value>跳过</Value>
       </Entry>
       <Entry key="Label.Status.Canceled">
-        <Value>Canceled</Value>
+        <Value>取消</Value>
       </Entry>
       <Entry key="Label.Status.Failed">
-        <Value>Failed</Value>
+        <Value>失败</Value>
       </Entry>
       <Entry key="Label.Status.Completed">
-        <Value>Completed</Value>
+        <Value>完成</Value>
       </Entry>
       <Entry key="Label.ViewStatusReason">
         <Value>Click to view status reason</Value>

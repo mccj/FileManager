@@ -34,8 +34,8 @@ namespace FileManagerTest
             //.AddFileProviderPhysicalPathReadOnly("d://")
             //.AddRootPhysicalFilePath("/bin")
             //.AddPhysicalFilePath("d://")
-            //.AddFtpStore("ftp://10.11.1.15/", 21, "mccj", "`1q2w3e4r")
-            //.AddWebDavStore(new System.Uri("http://10.11.11.11/remote.php/webdav/"), "mccj", "`1q2w3e4r")
+            //.AddFtpStore("ftp://10.11.1.15/", 21, "mccj", "123")
+            //.AddWebDavStore(new System.Uri("http://10.11.11.11/remote.php/webdav/"), "mccj", "123")
             //.AddCompressStore(System.IO.File.OpenRead(@"D:\Users\mccj\Source\Repos\FileManager\Test\FileManagerTest\wwwroot\AspNetCore-2.2.6.zip"))
             );
         }

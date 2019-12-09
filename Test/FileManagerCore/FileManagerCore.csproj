@@ -23,7 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Compress\FileManager.Storage.Compress.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Ftp\FileManager.Storage.Ftp.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.MongoDB\FileManager.Storage.MongoDB.csproj" />
     <ProjectReference Include="..\..\Src\FileManager.Storage.Standard\FileManager.Storage.Standard.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.WebDav\FileManager.Storage.WebDav.csproj" />
     <ProjectReference Include="..\..\Src\FileManager.UI.Explorer\FileManager.UI.Explorer.csproj" />
     <ProjectReference Include="..\..\Src\FileManager.UI.WebApi\FileManager.UI.WebApi.csproj" />
     <ProjectReference Include="..\..\Src\FileManager.UI\FileManager.UI.csproj" />

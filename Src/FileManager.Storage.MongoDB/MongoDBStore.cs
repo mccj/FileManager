@@ -1,6 +1,7 @@
 using FileManager.FileStorage;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace FileManager.Storage.MongoDB
     public class MongoDBStore : IFileStore
     {
         private readonly GridFSBucket _bucket;
+        //private readonly global::MongoDB.Driver.Linq.IMongoQueryable<GridFSFileInfo> _fsFilesInfo;
+        private readonly string _dirName = ".dir______";//文件夹标记
         //public MongoDBStore(MongoClientSettings settings) : this(new MongoClient(settings))
         //{
         //}
@@ -25,6 +28,7 @@ namespace FileManager.Storage.MongoDB
         {
             var database = client.GetDatabase(databaseName);
             _bucket = new GridFSBucket(database);
+            //_fsFilesInfo = _bucket.Database.GetCollection<GridFSFileInfo>("fs.files").AsQueryable();
         }
         public MongoDBStore(GridFSBucket bucket)
         {
@@ -32,93 +36,123 @@ namespace FileManager.Storage.MongoDB
         }
         public async Task<IFileStoreEntry> GetFileInfoAsync(string path)
         {
-            var requestUri = GetPhysicalPath(path);
-            var filesInfo = await _bucket.OpenDownloadStreamByNameAsync(requestUri);
+            path = GetPhysicalPath(path);
+            var filesInfo = await getGridFSFileInfoAsync(path);
             if (filesInfo != null)
             {
-                return new MongoDBStoreEntry(requestUri, new GridFSFileInfo(filesInfo.FileInfo.Metadata));
+                return new MongoDBStoreEntry(path, filesInfo);
             }
             return null;
         }
         public async Task<IFileStoreEntry> GetDirectoryInfoAsync(string path)
         {
-            var requestUri = GetPhysicalPath(path);
-
-            var filesInfo = await _bucket.FindAsync(requestUri);
-            if (filesInfo != null)
+            path = GetPhysicalPath(path);
+            var dirpath = path + "/" + _dirName;
+            var filesInfo = await getGridFSFileInfoAsync(dirpath);
+            if (filesInfo == null)
             {
-                return new MongoDBStoreEntry(requestUri, filesInfo.FirstOrDefault());
+                var filesInfos = await getGridFSDirectoryInfoAsync(dirpath);
+                if (filesInfos.Any())
+                {
+                    await TryCreateDirectoryAsync(path);
+                }
+                else
+                {
+                    return null;
+                }
             }
-            //        var filter = Builders<GridFSFileInfo>.Filter.And(
-            //Builders<GridFSFileInfo>.Filter.Eq(x => x.Filename, "securityvideo"));
 
-            //        using (var cursor = await _bucket.FindAsync(filter))
-            //        {
-            //            var results = (await cursor.ToListAsync()).Select(f => new MongoDBStoreEntry(requestUri, f));
-            //            return results;
-            //        }
-            return null;
+            return await Task.FromResult(new MongoDBStoreEntry(path, new GridFSFileInfo(new global::MongoDB.Bson.BsonDocument(new Dictionary<string, object> {
+                { "filename", path  } ,
+                {"length",-1 },
+                { "uploadDate",System.DateTime.MinValue}
+            }))));
+            //return null;
         }
         public async Task<IEnumerable<IFileStoreEntry>> GetDirectoryContentAsync(string path = null, bool includeSubDirectories = false)
         {
-            var requestUri = GetPhysicalPath(path);
-            //var filesInfo = await _bucket.FindAsync(requestUri);
-
-            var filter = Builders<GridFSFileInfo>.Filter.And(
-    Builders<GridFSFileInfo>.Filter.Eq(x => x.Filename, "securityvideo"));
-
-            using (var cursor = await _bucket.FindAsync(filter))
+            try
             {
-                var results = (await cursor.ToListAsync()).Select(f => new MongoDBStoreEntry(requestUri, f));
-                return results;
+                path = GetPhysicalPath(path);
+                //var ssss = _fsFilesInfo.Where(f => f.Filename.StartsWith(path)).ToArray();
+                var gridFSFileInfos = await getGridFSDirectoryInfoAsync(path);
+                var results = 转换当前目录(path, gridFSFileInfos);
+                //var results = ssss.Where(f => 是否当前目录(path, f.Filename)).Select(f => new MongoDBStoreEntry(path, f)).ToArray();
+                return await Task.FromResult(results);
             }
-            //return Enumerable.Empty<IFileStoreEntry>();
-        }
-        public Task<bool> TryCreateDirectoryAsync(string path)
-        {
-            throw new System.NotImplementedException();
-            //var requestUri = GetPhysicalPath(path);
-            //var response = await _ftpClient.Mkcol(requestUri);
+            catch (Exception ex)
+            {
 
-            //return response.IsSuccessful;
+                throw;
+            }
+
+            //Builders<GridFSFileInfo>.Filter.Regex(x => x.Filename, new global::MongoDB.Bson.BsonRegularExpression(""));
+            //using (var cursor = await _bucket.FindAsync(filter))
+            //{
+            //    var results = (await cursor.ToListAsync()).Select(f => new MongoDBStoreEntry(path, f));
+            //    return results;
+            //}
+            //return await Task.FromResult(Enumerable.Empty<IFileStoreEntry>());
+        }
+        public async Task<bool> TryCreateDirectoryAsync(string path)
+        {
+            path = GetPhysicalPath(path);
+            var dirpath = path + "/" + _dirName;
+            var fileInfo = await getGridFSFileInfoAsync(dirpath);
+            if (fileInfo != null)
+                throw new FileStoreException($"Cannot create directory because the path '{path}' already exists and is a file.");
+
+            var response = await _bucket.OpenUploadStreamAsync(dirpath);
+            await response.CloseAsync();
+            return response != null;
         }
         public async Task<bool> TryDeleteFileAsync(string path)
         {
-            var requestUri = GetPhysicalPath(path);
-            await _bucket.DeleteAsync(requestUri);
+            path = GetPhysicalPath(path);
+            var fileInfo = await getGridFSFileInfoAsync(path);
+            await _bucket.DeleteAsync(fileInfo.Id);
 
             return true;
         }
-        public Task<bool> TryDeleteDirectoryAsync(string path)
+        public async Task<bool> TryDeleteDirectoryAsync(string path)
         {
-            throw new System.NotImplementedException();
-            //var requestUri = GetPhysicalPath(path);
-            //var response = await _ftpClient.Delete(requestUri);
+            path = GetPhysicalPath(path);
 
-            //return response.IsSuccessful;
+            var fileInfos = await getGridFSDirectoryInfoAsync(path);
+
+            foreach (var item in fileInfos)
+            {
+                await _bucket.DeleteAsync(item.Id);
+            }
+
+            return true;
         }
         public async Task MoveFileAsync(string oldPath, string newPath)
         {
             var physicalOldPath = GetPhysicalPath(oldPath);
             var physicalNewPath = GetPhysicalPath(newPath);
 
-            await _bucket.RenameAsync(physicalOldPath, physicalNewPath);
+            var fileInfo = await getGridFSFileInfoAsync(physicalOldPath);
+            await _bucket.RenameAsync(fileInfo.Id, physicalNewPath);
         }
-
-        public Task CopyFileAsync(string srcPath, string dstPath)
+        public async Task CopyFileAsync(string srcPath, string dstPath)
         {
-            throw new System.NotImplementedException();
-            //var physicalSrcPath = GetPhysicalPath(srcPath);
-            //var physicalDstPath = GetPhysicalPath(dstPath);
+            var physicalSrcPath = GetPhysicalPath(srcPath);
+            if (await getGridFSFileInfoAsync(physicalSrcPath) == null)
+                throw new FileStoreException($"The file '{srcPath}' does not exist.");
 
-            //var response = await _ftpClient.Move(physicalSrcPath, physicalDstPath);
+            var physicalDstPath = GetPhysicalPath(dstPath);
+            if (await getGridFSFileInfoAsync(physicalDstPath) != null)
+                throw new FileStoreException($"Cannot copy file because the destination path '{dstPath}' already exists.");
 
-            //if (!response.IsSuccessful)
-            //{
-            //    throw new FileStoreException($"Cannot copy file '{srcPath}'.");
-            //}
+
+            var stream = await _bucket.OpenDownloadStreamByNameAsync(physicalSrcPath);
+            var response = await _bucket.UploadFromStreamAsync(physicalDstPath, stream);
+            if (response == null)
+            {
+                throw new FileStoreException($"Cannot copy file '{srcPath}'.");
+            }
         }
-
         public async Task<Stream> GetFileStreamAsync(string path)
         {
             var requestUri = GetPhysicalPath(path);
@@ -134,9 +168,16 @@ namespace FileManager.Storage.MongoDB
         }
         public async Task CreateFileFromStreamAsync(string path, Stream inputStream, bool overwrite = false)
         {
-            var requestUri = GetPhysicalPath(path);
-            var response = await _bucket.UploadFromStreamAsync(requestUri, inputStream);
-            if (response != null)
+            path = GetPhysicalPath(path);
+            var filter = Builders<GridFSFileInfo>.Filter.And(Builders<GridFSFileInfo>.Filter.Eq(x => x.Filename, path));
+            using (var cursor = await _bucket.FindAsync(filter))
+            {
+                if (cursor.Any())
+                    throw new FileStoreException($"Cannot create file '{path}' because it already exists.");
+            }
+
+            var response = await _bucket.UploadFromStreamAsync(path, inputStream);
+            if (response == null)
             {
                 throw new FileStoreException($"Cannot create file '{path}'.");
             }
@@ -195,7 +236,63 @@ namespace FileManager.Storage.MongoDB
 
             //return physicalPath;
         }
+        private async Task<IEnumerable<GridFSFileInfo>> getGridFSDirectoryInfoAsync(string path)
+        {
+            var results = _bucket.Database.GetCollection<GridFSFileInfo>("fs.files")
+                .AsQueryable().Where(f => f.Filename.StartsWith(path)).ToArray();
 
+            return await Task.FromResult(results);
+            //var filter = Builders<GridFSFileInfo>.Filter.Gte(x => x.Filename, path);
+            //using (var cursor = await _bucket.FindAsync(filter))
+            //{
+            //    var results = await cursor.ToListAsync();
+            //    return results;
+            //}
+        }
+        private async Task<GridFSFileInfo> getGridFSFileInfoAsync(string path)
+        {
+            var filter = Builders<GridFSFileInfo>.Filter.Eq(x => x.Filename, path);
+            using (var cursor = await _bucket.FindAsync(filter))
+            {
+                var results = (await cursor.ToListAsync())?.FirstOrDefault();
+                return results;
+            }
+        }
+        private bool 是否当前目录(string path, string subpath)
+        {
+            var l = path.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries).Length + 1;
+            return
+                subpath.StartsWith(path, StringComparison.OrdinalIgnoreCase) &&
+                subpath.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries).Length == l;
+        }
+        private IEnumerable<IFileStoreEntry> 转换当前目录(string path, IEnumerable<GridFSFileInfo> fileInfos)
+        {
+            var ddddf = new Dictionary<string, IFileStoreEntry>();
+            var l = path.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries).Length;
+
+            foreach (var item in fileInfos.Where(f => f.Filename.StartsWith(path)))
+            {
+                var rr = item.Filename.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries).Skip(l).ToArray();
+                var fileName = rr.FirstOrDefault();
+                if (rr.Length > 1 && !ddddf.ContainsKey(fileName))
+                {
+                    ddddf.Add(fileName, new MongoDBStoreEntry(path, new GridFSFileInfo(new global::MongoDB.Bson.BsonDocument(new Dictionary<string, object> {
+                        { "filename", path + "/" + fileName } ,
+                        {"length",-1 },
+                        { "uploadDate",System.DateTime.MinValue}
+                    }))));
+                }
+                else if (fileName == _dirName)
+                {//文件夹标记
+                    continue;
+                }
+                else if (!ddddf.ContainsKey(fileName))
+                {
+                    ddddf.Add(fileName, new MongoDBStoreEntry(path, item));
+                }
+            }
+            return ddddf.Values.ToArray();
+        }
         //private void DirectoryCopy(string sourceDirName, string destDirName)
         //{
         //    //// Get the subdirectories for the specified directory.

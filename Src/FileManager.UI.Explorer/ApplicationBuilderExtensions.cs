@@ -86,6 +86,7 @@ namespace FileManager
             routes.AddEmbeddedResource(assembly, "/Resource/(?<path>.+\\.ttf)", "application/font-sfnt", GetContentFolderNamespace("FileExplorer"));
             routes.AddEmbeddedResource(assembly, "/Resource/(?<path>.+\\.woff)", "application/font-woff", GetContentFolderNamespace("FileExplorer"));
             routes.AddEmbeddedResource(assembly, "/Resource/webviewer/(?<path>.+\\.html)", "text/html", GetContentFolderNamespace("FileExplorer.webviewer"));
+            routes.AddEmbeddedResource(assembly, "/Resource/(?<path>.+\\.swf)", "application/x-shockwave-flash", GetContentFolderNamespace("FileExplorer"));
             routes.AddCommand("/localization", async context =>
             {
                 var display = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("display") : context.Request.GetQuery("display");
@@ -167,10 +168,9 @@ namespace FileManager
                          //}
                      }
                  };
-                 var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
 
-                 context.Response.ContentType = "application/json";
-                 await context.Response.WriteAsync(json);
+                 await context.Response.JsonAsync(r);
+
 
                  //                           //var time = context.Request.GetQuery("time");
                  //                           var mode = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("mode") : context.Request.GetQuery("mode");
@@ -239,10 +239,7 @@ namespace FileManager
                         Folders = folders
                     }
                 };
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(json);
+                await context.Response.JsonAsync(r);
                 return true;
             });
             routes.AddCommand("/Filemanager/Delete", async context =>
@@ -271,10 +268,7 @@ namespace FileManager
                         Success = true,
                         Result = rr.ItemNames
                     };
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(json);
+                    await context.Response.JsonAsync(r);
                 }
                 catch (Exception ex)
                 {
@@ -286,10 +280,7 @@ namespace FileManager
                             Message = ex.Message
                         }
                     };
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(json);
+                    await context.Response.JsonAsync(r);
                 }
                 return true;
             });
@@ -317,10 +308,7 @@ namespace FileManager
                         Success = true,
                         Result = rr.ItemNewName
                     };
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(json);
+                    await context.Response.JsonAsync(r);
                 }
                 catch (Exception ex)
                 {
@@ -332,10 +320,7 @@ namespace FileManager
                             Message = ex.Message
                         }
                     };
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(json);
+                    await context.Response.JsonAsync(r);
                 }
                 return true;
             });
@@ -359,10 +344,7 @@ namespace FileManager
                                 Success = true,
                                 Result = rr.ItemName
                             };
-                            var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                            context.Response.ContentType = "application/json";
-                            await context.Response.WriteAsync(json);
+                            await context.Response.JsonAsync(r);
                         }
                     }
                 }
@@ -376,10 +358,7 @@ namespace FileManager
                             Message = ex.Message
                         }
                     };
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(json);
+                    await context.Response.JsonAsync(r);
                 }
                 return true;
             });
@@ -416,10 +395,7 @@ namespace FileManager
                         Success = true,
                         Result = rr.ItemNames
                     };
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(json);
+                    await context.Response.JsonAsync(r);
                 }
                 catch (Exception ex)
                 {
@@ -431,10 +407,7 @@ namespace FileManager
                             Message = ex.Message
                         }
                     };
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(json);
+                    await context.Response.JsonAsync(r);
                 }
 
                 return true;
@@ -471,10 +444,7 @@ namespace FileManager
                         Success = true,
                         Result = rr.ItemNames
                     };
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(json);
+                    await context.Response.JsonAsync(r);
                 }
                 catch (Exception ex)
                 {
@@ -486,10 +456,7 @@ namespace FileManager
                             Message = ex.Message
                         }
                     };
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(json);
+                    await context.Response.JsonAsync(r);
                 }
 
                 return true;
@@ -504,10 +471,7 @@ namespace FileManager
                         Message = "暂时不支持此功能"
                     }
                 };
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(json);
+                await context.Response.JsonAsync(r);
                 return true;
             });
             routes.AddCommand("/Filemanager/ExtractAll", async context =>
@@ -520,10 +484,7 @@ namespace FileManager
                         Message = "暂时不支持此功能"
                     }
                 };
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(json);
+                await context.Response.JsonAsync(r);
                 return true;
             });
 
@@ -595,8 +556,7 @@ namespace FileManager
                      var f = applicationServices.GetService<FileStorage.IFileStore>();
                      var rr11 = await f.GetFileStreamAsync(path + "/" + fileName);
 
-                     context.Response.ContentType = getMimeMapping(fileName);
-                     await context.Response.CopyToAsync(rr11);
+                     await context.Response.FileAsync(rr11, getMimeMapping(fileName));
                  }
 
                  return true;
@@ -631,13 +591,12 @@ namespace FileManager
                 bool.TryParse(openInBrowser, out bool result);
                 if (result)
                 {
-                    context.Response.ContentType = getMimeMapping(fileName);
+                    await context.Response.FileAsync(rr11, getMimeMapping(fileName));
                 }
                 else
                 {
-                    context.Response.ContentType = "application/octet-stream";
+                    await context.Response.FileAsync(rr11, "application/octet-stream", fileName);
                 }
-                await context.Response.CopyToAsync(rr11);
                 return true;
             });
             routes.AddCommand("/Filemanager/DownloadAsZip", async context =>
@@ -711,6 +670,7 @@ namespace FileManager
 
             routes.AddCommand("/Fileuploader/Begin", async context =>
             {
+                var f = applicationServices.GetService<FileStorage.IFileStore>();
                 IMemoryCache memoryCache = applicationServices.GetService<IMemoryCache>();
                 var rr = await context.Request.GetBodyModelBinderAsync<UploaderBegin>();
 
@@ -719,55 +679,71 @@ namespace FileManager
                 var r = new
                 {
                     Success = true,
-                    Result = rr.Validations
+                    Result = rr.Validations.ToDictionary(ff => ff.Key, ff =>
+                    {
+                        var rrr = f.GetFileInfoAsync(ff.Value.Name).Result;
+                        return new
+                        {
+                            Action = 0,//Action = 0:Accept(接受)，1:Reject(拒绝)，2:ConfirmReplace(确认替换)
+                                       //Data = new { ItemType = 0 },//ItemType = 1:Folder，2:File
+                                       //ActionData = "拒绝原因"
+                                       //ActionData = new
+                                       //{
+                                       //    ExistingFileDate = System.DateTimeOffset.Now,
+                                       //    ExistingFileName = ff.Value.Name,
+                                       //    ExistingFileSize = rrr.Length,
+                                       //    NewFileName = "timg(2).jpg"
+                                       //}
+                        };
+                    })
                 };
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(json);
+                await context.Response.JsonAsync(r);
                 return true;
             });
             routes.AddCommand("/Fileuploader/SendStream", async context =>
             {
-                var stateId = context.Request.GetQuery("stateId");
-                var uploadId = context.Request.GetQuery("uploadId");
-                var itemId = context.Request.GetQuery("itemId");
-                var size = context.Request.GetQuery("size");
-                var name = context.Request.GetQuery("name");
-                var dateModified = context.Request.GetQuery("dateModified");
-                var chunk = context.Request.GetQuery("chunk");
-                var chunks = context.Request.GetQuery("chunks");
-
-                IMemoryCache memoryCache = applicationServices.GetService<IMemoryCache>();
-                var rr = memoryCache.Get<UploaderBegin>(uploadId);
-
-                var f = applicationServices.GetService<FileStorage.IFileStore>();
-
-                var dsfsdf = System.Text.RegularExpressions.Regex.Match(rr?.CustomParameters?.FileManagerPath, "\\[(?<drive>.*)\\]:(?<path>.*)");
-                var drive = dsfsdf.Result("${drive}");
-                var ppath = dsfsdf.Result("${path}");
-
-                var path = ppath + "\\" + name;
-                await f.CreateFileFromStreamAsync(path, context.Request.Body);
-
-
-                //var body = new System.IO.BinaryReader(context.Request.Body).ReadToEnd();
-                //var r = new
-                //{
-                //    Success = false,
-                //    Result = new
-                //    {
-                //        Message = "暂时不支持此功能"
-                //    }
-                //};
-                var r = new
+                try
                 {
-                    Success = true
-                };
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
+                    var stateId = context.Request.GetQuery("stateId");
+                    var uploadId = context.Request.GetQuery("uploadId");
+                    var itemId = context.Request.GetQuery("itemId");
+                    var size = context.Request.GetQuery("size");
+                    var name = context.Request.GetQuery("name");
+                    var dateModified = context.Request.GetQuery("dateModified");
+                    var chunk = context.Request.GetQuery("chunk");
+                    var chunks = context.Request.GetQuery("chunks");
 
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(json);
+                    IMemoryCache memoryCache = applicationServices.GetService<IMemoryCache>();
+                    var rr = memoryCache.Get<UploaderBegin>(uploadId);
+
+                    var f = applicationServices.GetService<FileStorage.IFileStore>();
+
+                    var dsfsdf = System.Text.RegularExpressions.Regex.Match(rr?.CustomParameters?.FileManagerPath, "\\[(?<drive>.*)\\]:(?<path>.*)");
+                    var drive = dsfsdf.Result("${drive}");
+                    var ppath = dsfsdf.Result("${path}");
+
+                    var path = ppath + "\\" + name;
+                    await f.CreateFileFromStreamAsync(path, context.Request.Body);
+
+                    var r = new
+                    {
+                        Success = true
+                    };
+                    await context.Response.JsonAsync(r);
+                }
+                catch (Exception ex)
+                {
+                    var r = new
+                    {
+                        Success = false,
+                        Result = new
+                        {
+                            Message = ex.Message
+                        }
+                    };
+
+                    await context.Response.JsonAsync(r);
+                }
                 return true;
             });
             routes.AddCommand("/Fileuploader/End", async context =>
@@ -781,10 +757,56 @@ namespace FileManager
                 {
                     Success = true
                 };
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
+                await context.Response.JsonAsync(r);
+                return true;
+            });
+            routes.AddCommand("/Fileuploader/Skip", async context =>
+            {
+                var rr = await context.Request.GetBodyModelBinderAsync<UploaderSkip>();
 
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(json);
+                var r = new
+                {
+                    Success = true
+                };
+                await context.Response.JsonAsync(r);
+                return true;
+            });
+            routes.AddCommand("/Fileuploader/Cancel", async context =>
+            {
+                var rr = await context.Request.GetBodyModelBinderAsync<UploaderSkip>();
+
+                var r = new
+                {
+                    Success = true
+                };
+                await context.Response.JsonAsync(r);
+                return true;
+            });
+            routes.AddCommand("/Fileuploader/KeepSessionAlive", async context =>
+            {
+                var rr = await context.Request.GetBodyModelBinderAsync<ParametersBaseB>();
+
+                var r = new
+                {
+                    Result = true,
+                    Success = true
+                };
+                await context.Response.JsonAsync(r);
+                return true;
+            });
+
+            routes.AddCommand("/Fileuploader/Fail", async context =>
+            {
+                IMemoryCache memoryCache = applicationServices.GetService<IMemoryCache>();
+
+                var rr = await context.Request.GetBodyModelBinderAsync<UploaderFail>();
+                memoryCache.Remove(rr.UploadId);
+
+                var r = new
+                {
+                    Success = true
+                };
+                await context.Response.JsonAsync(r);
                 return true;
             });
 
@@ -795,10 +817,8 @@ namespace FileManager
                     Success = true,
                     Result = 637100357324610856
                 };
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
 
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(json);
+                await context.Response.JsonAsync(r);
                 return true;
             });
             routes.AddCommand("/DocumentViewer/DownloadDocument", async context =>
@@ -852,9 +872,7 @@ namespace FileManager
                //        Message = "暂时不支持此功能"
                //    }
                //};
-               //var json = Newtonsoft.Json.JsonConvert.SerializeObject(r);
-               //context.Response.ContentType = "application/json";
-               //await context.Response.WriteAsync(json);
+               //await context.Response.JsonAsync(r);
                return await System.Threading.Tasks.Task.FromResult(true);
            });
         }
@@ -872,7 +890,34 @@ namespace FileManager
             return $"{assemblyName}.Content.{contentFolder}";
         }
     }
+    public static class DashboardResponse_Eeeeeeeeeeeeeeeeeeeeeee
+    {
+        public static void Json(this DashboardResponse response, object data/*, JsonSerializerSettings serializerSettings = null*/)
+        {
+            JsonAsync(response, data).Wait();
+        }
+        public static async System.Threading.Tasks.Task JsonAsync(this DashboardResponse response, object data/*, JsonSerializerSettings serializerSettings = null*/)
+        {
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
 
+            response.ContentType = "application/json";
+            await response.WriteAsync(json);
+        }
+        public static async System.Threading.Tasks.Task FileAsync(this DashboardResponse response, System.IO.Stream fileStream, string contentType, string fileDownloadName = null)
+        {
+            response.ContentType = contentType;
+            if (!string.IsNullOrWhiteSpace(fileDownloadName))
+                response.SetHeader("Content-Disposition", "attachment;" + "filename=" + Uri.EscapeDataString(fileDownloadName));
+            await response.CopyToAsync(fileStream);
+        }
+        public static async System.Threading.Tasks.Task FileAsync(this DashboardResponse response, byte[] fileContents, string contentType, string fileDownloadName)
+        {
+            response.ContentType = contentType;
+            if (!string.IsNullOrWhiteSpace(fileDownloadName))
+                response.SetHeader("Content-Disposition", "attachment;" + "filename=" + Uri.EscapeDataString(fileDownloadName));
+            await response.WriteAsync(fileContents);
+        }
+    }
 
     public class ParametersBaseB
     {
@@ -986,6 +1031,18 @@ namespace FileManager
 
         [JsonProperty("customParameters")]
         public CustomParameters CustomParameters { get; set; }
+    }
+    public class UploaderFail : UploaderEnd
+    {
+        [JsonProperty("itemId")]
+        public string ItemId { get; set; }
+        [JsonProperty("clientError")]
+        public string ClientError { get; set; }
+    }
+    public class UploaderSkip : UploaderEnd
+    {
+        [JsonProperty("itemIds")]
+        public string[] ItemIds { get; set; }
     }
 }
 
