@@ -894,7 +894,7 @@ namespace FileManager
             return $"{assemblyName}.Content.{contentFolder}";
         }
     }
-    public static class DashboardResponse_Eeeeeeeeeeeeeeeeeeeeeee
+    public static class DashboardResponse_Extensions
     {
         public static void Json(this DashboardResponse response, object data/*, JsonSerializerSettings serializerSettings = null*/)
         {
