@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Version>1.0.0</Version>
     
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <!--<GeneratePackageOnBuild>true</GeneratePackageOnBuild>-->
     <Authors>mccj</Authors>
     <Description>
       WebFileManagerUI
@@ -11,5 +11,6 @@
       在线文件管理系统
     </Description>
     <PackageTags>Web File Manager UI 在线 文件 管理 分布式 存储</PackageTags>
+    <RepositoryUrl>https://github.com/mccj/FileManager</RepositoryUrl>
   </PropertyGroup>
 </Project>

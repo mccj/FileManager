@@ -507,8 +507,12 @@ namespace FileManager
                     {
                         var imgS = new System.Drawing.Bitmap(rr11);
                         var img = imgS.GetThumbnailImage(Math.Min(wwww, imgS.Width), Math.Min(wwww, imgS.Height), () => true, IntPtr.Zero);
-                        var ms = new System.IO.MemoryStream();
-                        img.Save(context.Response.Body, System.Drawing.Imaging.ImageFormat.Png);
+                        using (var ms = new System.IO.MemoryStream())
+                        {
+                            img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                            var bytes = ms.GetBuffer();
+                            await context.Response.WriteAsync(bytes);
+                        }
                         return true;
                     }
                     catch (Exception ex)
@@ -908,7 +912,7 @@ namespace FileManager
             response.ContentType = contentType;
             if (!string.IsNullOrWhiteSpace(fileDownloadName))
                 response.SetHeader("Content-Disposition", "attachment;" + "filename=" + Uri.EscapeDataString(fileDownloadName));
-            await response.CopyToAsync(fileStream);
+            await response.WriteAsync(fileStream);
         }
         public static async System.Threading.Tasks.Task FileAsync(this DashboardResponse response, byte[] fileContents, string contentType, string fileDownloadName)
         {
