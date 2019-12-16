@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NSwag.MSBuild" Version="13.1.2">
+    <PackageReference Include="NSwag.MSBuild" Version="13.1.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -19,8 +19,8 @@
 
   <Target Name="NSwag" AfterTargets="Build">
     <!--<Exec Command="$(NSwagExe_Core22) run OmsApi3\nswag.json /variables:Configuration=$(Configuration)" />-->
-    <!--<Exec Command="$(NSwagExe_Core22) run OmsApi3\OmsApiClient.nswag /variables:Configuration=$(Configuration)" />
-    <Exec Command="$(NSwagExe_Core22) run OmsApi3\OmsApiModels.nswag /variables:Configuration=$(Configuration)" />-->
+    <!--<Exec Command="$(NSwagExe_Core22) run FileClient.nswag /variables:Configuration=$(Configuration)" />
+    <Exec Command="$(NSwagExe_Core22) run FileClientModels.nswag /variables:Configuration=$(Configuration)" />-->
   </Target>
 
 </Project>
