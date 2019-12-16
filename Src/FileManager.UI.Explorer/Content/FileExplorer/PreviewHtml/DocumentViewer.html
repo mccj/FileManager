@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <title>Document Viewer</title>
@@ -18,10 +18,10 @@
                 resizable: false,
                 resizeHandles: "s, e, se",
                 displayMode: "Viewport",
-                stateId: "dlace3",
+                stateId: "{${stateId}$}",
                 path: "../Resource/webviewer",
                 handlerUrl: "../DocumentViewer",
-                cacheInfoKey: "z03xrq/z03xrq-1rv5896.json",
+                cacheInfoKey: "{${cacheInfoKey}$}",
                 firstTime: false,
                 language: "cn",
                 languageUrl: "../../localization.json?display=__lng__",
@@ -48,7 +48,7 @@
                     pageRange: ""
                 },
                 mobileMode: "OnAny",
-                custom: "{\"permissions\":262143,\"showToolbar\":true,\"showSidePane\":true,\"singlePageRotation\":false,\"downloadUrl\":\"filemanager.ashx/Download?stateId=1p4rrzv&path=%5b1.+Root+Folder%5d%3a%5c&openInBrowser=false&fileName=PDF+Sample+File.pdf\",\"downloadAsPdfUrl\":\"documentviewer.ashx/DownloadAsPdf?stateId=dlace3&cacheInfoKey=z03xrq/z03xrq-1rv5896.json\"}",
+                custom: "{${custom}$}",
                 clientEvents: {}
             };
             if (window.loaderReady)

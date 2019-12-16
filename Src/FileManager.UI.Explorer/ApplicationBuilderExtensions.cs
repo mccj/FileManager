@@ -551,9 +551,40 @@ namespace FileManager
                      var stream = assembly.GetManifestResourceStreamIgnoreCase(GetContentResourceName("FileExplorer.PreviewHtml", previewerType + ".html"));
                      var htmlSource = new System.IO.StreamReader(stream).ReadToEnd();
 
-                     var html = htmlSource;//.Replace("{${imgurl}$}", $"../Filemanager/GetImage?stateId={stateId}&path={mpath}&fileName={fileName}&vary=635881258701436895").Replace("{${imgalt}$}", fileName);
                      context.Response.ContentType = "text/html";
-                     await context.Response.WriteAsync(html);
+                     if (previewerType.Equals("DocumentViewer", StringComparison.OrdinalIgnoreCase))
+                     {
+                         var cacheInfoKey = "122zns7/122zns7-1jeos1s.json";
+                         //var cacheInfoKey = "18ghsfk/18ghsfk-60islb.json";
+                         //var cacheInfoKey = "1a5bxod/1a5bxod-1euckfi.json";
+                         //var cacheInfoKey = "1hv5q20/1hv5q20-1kzn3dk.json";
+                         //var cacheInfoKey = "3rquv6/3rquv6-twskyc.json";
+                         //var cacheInfoKey = "5cxuir/5cxuir-he7qbc.json";
+                         //var cacheInfoKey = "bbstue/bbstue-1800nbm.json";
+                         //var cacheInfoKey = "t3oyti/t3oyti-zv9iao.json";
+                         //var cacheInfoKey = "z03xrq/z03xrq-1rv5896.json";
+                         var html = htmlSource
+                         .Replace("{${stateId}$}", stateId)
+                         .Replace("{${cacheInfoKey}$}", cacheInfoKey)
+                         .Replace("{${custom}$}", Newtonsoft.Json.JsonConvert.SerializeObject(
+                             new
+                             {
+                                 permissions = 262143,
+                                 showToolbar = true,
+                                 showSidePane = true,
+                                 singlePageRotation = false,
+
+                                 downloadUrl = $"../../Filemanager/Download?stateId={stateId}&path={Uri.EscapeUriString(mpath)}&openInBrowser=false&fileName={fileName}",
+                                 downloadAsPdfUrl = $"../../DocumentViewer/DownloadAsPdf?stateId={stateId}&cacheInfoKey={cacheInfoKey}",
+                             }
+                         ).Replace("\"", "\\\""));
+                         await context.Response.WriteAsync(html);
+                     }
+                     else
+                     {
+                         var html = htmlSource;//.Replace("{${imgurl}$}", $"../Filemanager/GetImage?stateId={stateId}&path={mpath}&fileName={fileName}&vary=635881258701436895").Replace("{${imgalt}$}", fileName);
+                         await context.Response.WriteAsync(html);
+                     }
                  }
                  else
                  {
@@ -565,7 +596,7 @@ namespace FileManager
 
                  return true;
              });
-            routes.AddCommand(new[] { "/Filemanager/GetImage", "/Filemanager/Download/(?<fileName>.*)" }, async context =>
+            routes.AddCommand(new[] { "/Filemanager/GetImage", "/Filemanager/Download", "/Filemanager/Download/(?<fileName>.*)" }, async context =>
             {
                 var mpath = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("path") : context.Request.GetQuery("path");
                 var fileName = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("fileName") : context.Request.GetQuery("fileName");
@@ -604,40 +635,6 @@ namespace FileManager
                 return true;
             });
             routes.AddCommand("/Filemanager/DownloadAsZip", async context =>
-            {
-                var html = @"<!DOCTYPE html>
-<html>
-    <head>
-        <title>Download Error</title>
-        <script type=""text/javascript"">
-            if (parent && parent.fileManager) {
-                var exceptionResult = {
-  ""Message"": ""暂时不支持此功能""
-};
-                parent.fileManager.messageBox.showError(
-                    {
-                        title: ""Action Error"",
-                        message: exceptionResult.Message,
-                        detailsConfig: {
-                            data: exceptionResult.Type ? exceptionResult : null,
-                            type: ""json""
-                        }
-                    }
-                );
-            }
-            if (parent === self)
-                window.close();
-        </script>        
-    </head>
-    <body>
-    </body>
-</html>";
-
-                context.Response.ContentType = "text/html";
-                await context.Response.WriteAsync(html);
-                return true;
-            });
-            routes.AddCommand("/Filemanager/DownloadAsPdf", async context =>
             {
                 var html = @"<!DOCTYPE html>
 <html>
@@ -816,6 +813,7 @@ namespace FileManager
 
             routes.AddCommand("/DocumentViewer/PrepareDocument", async context =>
             {
+                var rr = await context.Request.GetBodyModelBinderAsync<CacheParameters>();
                 var r = new
                 {
                     Success = true,
@@ -834,33 +832,34 @@ namespace FileManager
                 var range = context.Request.GetHeader("Range");
                 var ifRange = context.Request.GetHeader("If-Range");
 
-                var stream = assembly.GetManifestResourceStreamIgnoreCase(GetContentResourceName("FileExplorer.tmpPdf", "z03xrq-1rv5896.xpz"));
+                var filename = System.IO.Path.GetFileName(System.IO.Path.ChangeExtension(cacheInfoKey, ".xpz"));
+                var stream = assembly.GetManifestResourceStreamIgnoreCase(GetContentResourceName("FileExplorer.tmpPdf", filename));//t3oyti-zv9iao.xpz//z03xrq-1rv5896.xpz
 
                 context.Response.ContentType = "application/octet-stream";
-                context.Response.SetHeader("ETag", "\"637094457471508903\"");
-                context.Response.SetHeader("Content-Disposition", "inline; filename=\"z03xrq-1rv5896.xpz\"");
+                context.Response.SetHeader("ETag", $"\"{v}\"");
+                context.Response.SetHeader("Content-Disposition", $"inline; filename=\"{filename}\"");
                 context.Response.StatusCode = 206;
 
-                var s = _range.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(f => { long.TryParse(f, out var iii); return iii; }).ToArray();
+                var rangeSplit = _range.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(f => { long.TryParse(f, out var iii); return iii; }).ToArray();
                 var streamLength = stream.Length;
 
-                if (s.Length == 1)
+                if (rangeSplit.Length == 1)
                 {
-                    var streamStart = streamLength + s[0];
+                    var streamStart = streamLength + rangeSplit[0];
                     var streamEnd = streamLength;
                     var streamCount = streamEnd - streamStart;
-                    context.Response.SetHeader("Content-Range", "bytes " + streamStart + "-" + (streamEnd - 1) + "/" + streamLength);
+                    context.Response.SetHeader("Content-Range", $"bytes {streamStart}-{(streamEnd - 1)}/{streamLength}");
                     var bydes = new byte[streamCount];
                     stream.Position = streamStart;
                     await stream.ReadAsync(bydes, 0, Convert.ToInt32(streamCount));
                     await context.Response.WriteAsync(bydes);
                 }
-                else if (s.Length == 2)
+                else if (rangeSplit.Length == 2)
                 {
-                    var streamStart = s[0];
-                    var streamEnd = s[1];
+                    var streamStart = rangeSplit[0];
+                    var streamEnd = rangeSplit[1];
                     var streamCount = streamEnd - streamStart;
-                    context.Response.SetHeader("Content-Range", "bytes " + streamStart + "-" + (streamEnd - 1) + "/" + streamLength);
+                    context.Response.SetHeader("Content-Range", $"bytes {streamStart}-{(streamEnd - 1)}/{streamLength}");
                     var bydes = new byte[streamCount];
                     stream.Position = streamStart;
                     await stream.ReadAsync(bydes, 0, Convert.ToInt32(streamCount));
@@ -884,6 +883,15 @@ namespace FileManager
                //await context.Response.JsonAsync(r);
                return await System.Threading.Tasks.Task.FromResult(true);
            });
+            routes.AddCommand("/DocumentViewer/DownloadAsPdf", async context =>
+            {
+                var stateId = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("stateId") : context.Request.GetQuery("stateId");
+                var cacheInfoKey = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("cacheInfoKey") : context.Request.GetQuery("cacheInfoKey");
+
+                context.Response.ContentType = "application/pdf";
+                await context.Response.WriteAsync("");
+                return true;
+            });
         }
         private static System.Reflection.Assembly GetExecutingAssembly()
         {
@@ -932,6 +940,11 @@ namespace FileManager
     {
         [JsonProperty("stateId")]
         public string StateId { get; set; }
+    }
+    public class CacheParameters : ParametersBaseB
+    {
+        [JsonProperty("cacheInfoKey")]
+        public string CacheInfoKey { get; set; }
     }
     public class ParametersBase : ParametersBaseB
     {
