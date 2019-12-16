@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.0" Condition="'$(TargetFramework)' == 'netstandard2.1'" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.2.0" Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'NET461'" />
 
-    <PackageReference Include="AspNetCoreDashboard" Version="1.0.0-beta-8" />
+    <PackageReference Include="AspNetCoreDashboard" Version="1.0.0-beta-9" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
     <!--<PackageReference Include="sharpcompress" Version="0.24.0" />
     <PackageReference Include="SharpZipLib" Version="1.2.0" />-->

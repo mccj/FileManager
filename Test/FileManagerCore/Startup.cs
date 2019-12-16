@@ -67,8 +67,8 @@ namespace FileManagerCore3
             app.UseNSwagSwaggerUI();
             app.UseHealthChecks("/health");
             app.UseFileManagerUI("/Browser", f => f
-                 .UseDefaultFileManagerUI()
-                 //.UseFileExplorerUI()
+                 //.UseDefaultFileManagerUI()
+                 .UseFileExplorerUI()
             );
 
 #if netcoreapp3

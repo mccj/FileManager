@@ -8,10 +8,10 @@
     <Copyright>Copyright ©  2018</Copyright>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Owin.Host.HttpListener" Version="4.0.0" />
-    <PackageReference Include="Microsoft.Owin.Host.HttpListener.zh-Hans" Version="4.0.0" />
-    <PackageReference Include="Microsoft.Owin.Hosting" Version="4.0.0" />
-    <PackageReference Include="Microsoft.Owin.Hosting.zh-Hans" Version="4.0.0" />
+    <PackageReference Include="Microsoft.Owin.Host.HttpListener" Version="4.1.0" />
+    <PackageReference Include="Microsoft.Owin.Host.HttpListener.zh-Hans" Version="4.1.0" />
+    <PackageReference Include="Microsoft.Owin.Hosting" Version="4.1.0" />
+    <PackageReference Include="Microsoft.Owin.Hosting.zh-Hans" Version="4.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Src\FileManager.UI\FileManager.UI.csproj" />
