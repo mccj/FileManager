@@ -841,26 +841,31 @@ namespace FileManager
                 context.Response.SetHeader("Content-Disposition", "inline; filename=\"z03xrq-1rv5896.xpz\"");
                 context.Response.StatusCode = 206;
 
-                var s = _range.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(f => { int.TryParse(f, out var iii); return iii; }).ToArray();
-                if (s.Length != 2)
-                {
-                    context.Response.SetHeader("Content-Range", "bytes 6445488-6445509/6445510");
-                    var count = 6445509 - 6445488 + 1;
-                    var bydes = new byte[count];
-                    stream.Position = 6445488;
-                    stream.Read(bydes, 0, count);
-                    await context.Response.WriteAsync(bydes);
-                }
-                else
-                {
-                    context.Response.SetHeader("Content-Range", "bytes " + s[0] + "-" + (s[1] - 1) + "/" + stream.Length);
-                    var count = s[1] - s[0];
-                    var bydes = new byte[count];
-                    stream.Position = s[0];
-                    stream.Read(bydes, 0, count);
-                    await context.Response.WriteAsync(bydes);
-                }
+                var s = _range.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(f => { long.TryParse(f, out var iii); return iii; }).ToArray();
+                var streamLength = stream.Length;
 
+                if (s.Length == 1)
+                {
+                    var streamStart = streamLength + s[0];
+                    var streamEnd = streamLength;
+                    var streamCount = streamEnd - streamStart;
+                    context.Response.SetHeader("Content-Range", "bytes " + streamStart + "-" + (streamEnd - 1) + "/" + streamLength);
+                    var bydes = new byte[streamCount];
+                    stream.Position = streamStart;
+                    await stream.ReadAsync(bydes, 0, Convert.ToInt32(streamCount));
+                    await context.Response.WriteAsync(bydes);
+                }
+                else if (s.Length == 2)
+                {
+                    var streamStart = s[0];
+                    var streamEnd = s[1];
+                    var streamCount = streamEnd - streamStart;
+                    context.Response.SetHeader("Content-Range", "bytes " + streamStart + "-" + (streamEnd - 1) + "/" + streamLength);
+                    var bydes = new byte[streamCount];
+                    stream.Position = streamStart;
+                    await stream.ReadAsync(bydes, 0, Convert.ToInt32(streamCount));
+                    await context.Response.WriteAsync(bydes);
+                }
 
                 return true;
             });
