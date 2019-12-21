@@ -42,7 +42,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileManager.UI.WebApi.Sdk", "Src\FileManager.UI.WebApi.Sdk\FileManager.UI.WebApi.Sdk.csproj", "{74731FFB-32E5-4880-933C-E4C9B3513D0B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileManager.Storage.MongoDB", "Src\FileManager.Storage.MongoDB\FileManager.Storage.MongoDB.csproj", "{C7747E70-8E75-4EB1-B582-A54BEFEF9AEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileManager.Storage.MongoDB", "Src\FileManager.Storage.MongoDB\FileManager.Storage.MongoDB.csproj", "{C7747E70-8E75-4EB1-B582-A54BEFEF9AEF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SixLabors.ImageSharp.Formats.Psd", "..\SixLabors.ImageSharp.Formats.PSD\SixLabors.ImageSharp.Formats.PSD\SixLabors.ImageSharp.Formats.Psd.csproj", "{1A1E8D38-D265-4279-8C9A-5035D5B40C42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -114,6 +116,10 @@ Global
 		{C7747E70-8E75-4EB1-B582-A54BEFEF9AEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7747E70-8E75-4EB1-B582-A54BEFEF9AEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7747E70-8E75-4EB1-B582-A54BEFEF9AEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A1E8D38-D265-4279-8C9A-5035D5B40C42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A1E8D38-D265-4279-8C9A-5035D5B40C42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A1E8D38-D265-4279-8C9A-5035D5B40C42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A1E8D38-D265-4279-8C9A-5035D5B40C42}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

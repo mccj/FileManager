@@ -59,7 +59,7 @@ namespace FileManagerCore.Controllers
             }
         }
         [HttpPost]
-        public async Task<ActionResult<byte[][]>> GetListFilesAsync(string path,string extension)
+        public async Task<ActionResult<byte[][]>> GetListFilesAsync(string path, string extension)
         {
             try
             {
@@ -68,20 +68,21 @@ namespace FileManagerCore.Controllers
 
                 var DirectoryInfo = await _fileStore.GetDirectoryContentAsync(path, true);
 
-                if(DirectoryInfo == null)
+                if (DirectoryInfo == null)
                     throw new ArgumentNullException(nameof(path));
 
                 var fileBytes = DirectoryInfo
                     .Where(f => System.IO.Path.GetExtension(f.Path) == extension)
+                    .AsParallel()
                     .Select(ff =>
-                    {
-                        using (var r = _fileStore.GetFileStreamAsync(ff.Path).Result)
-                        {
-                            var stream = new System.IO.MemoryStream();
-                            r.CopyToAsync(stream).Wait();
-                            return stream.ToArray();
-                        }
-                    }).ToArray();
+                   {
+                       using (var r = _fileStore.GetFileStreamAsync(ff.Path).Result)
+                       {
+                           var stream = new System.IO.MemoryStream();
+                           r.CopyToAsync(stream).Wait();
+                           return stream.ToArray();
+                       }
+                   }).ToArray();
                 return fileBytes;
             }
             catch (Exception ex)

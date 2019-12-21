@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using IAppBuilder = Microsoft.AspNetCore.Builder.IApplicationBuilder;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp;
 
 namespace FileManager
 {
@@ -76,6 +78,8 @@ namespace FileManager
         }
         private static void initRoute(RouteCollection routes, IServiceProvider applicationServices)
         {
+            Configuration.Default.Configure(new SixLabors.ImageSharp.Formats.Psd.PsdConfigurationModule());
+
             var assembly = GetExecutingAssembly();
             routes.Add("", new RedirectDispatcher((uriMatch) => uriMatch.Value + "/"));
             routes.Add("/", new EmbeddedResourceDispatcher(System.Net.Mime.MediaTypeNames.Text.Html, assembly, GetContentResourceName("FileExplorer", "index.html")));
@@ -144,12 +148,12 @@ namespace FileManager
 
 
 
-                 var folders = rr11.Where(ff => ff.IsDirectory).Select(ff => new object[] { ff.Name, null, null, true, null, ff.LastModifiedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK") }).ToArray();
+                 var folders = rr11.Where(ff => ff.IsDirectory).Select(ff => new object[] { ff.Name, null, null/*".jpg|*.png|*.bmp|*.gif"*/, true, null, ff.LastModifiedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK") }).ToArray();
                  var files = rr11.Where(ff => !ff.IsDirectory).Select(ff => new object[] { ff.Name, ff.Length, null, ff.LastModifiedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK") }).ToArray();
 
                  //文件  ：name,size,systemType,dateModified
                  //文件夹：name,permissions,fileTypes,size,systemType,dateModified
-
+                 //permissions:1073774591,26755,1,2,7,11,19,35,67,24707,
                  var r = new
                  {
                      Success = true,
@@ -497,7 +501,7 @@ namespace FileManager
                 var drive = dsfsdf.Result("${drive}");
                 var path = dsfsdf.Result("${path}");
                 var f = applicationServices.GetService<FileStorage.IFileStore>();
-                var rr11 = await f.GetFileStreamAsync(path + "/" + fileName);
+                var inStream = await f.GetFileStreamAsync(path + "/" + fileName);
 
                 context.Response.ContentType = getMimeMapping(fileName);
 
@@ -505,14 +509,36 @@ namespace FileManager
                 {
                     try
                     {
-                        var imgS = new System.Drawing.Bitmap(rr11);
-                        var img = imgS.GetThumbnailImage(Math.Min(wwww, imgS.Width), Math.Min(wwww, imgS.Height), () => true, IntPtr.Zero);
-                        using (var ms = new System.IO.MemoryStream())
+                        var sdfs = SixLabors.ImageSharp.Image.DetectFormat(inStream);
+                        using (var image = SixLabors.ImageSharp.Image.Load(inStream))
                         {
-                            img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                            var bytes = ms.GetBuffer();
-                            await context.Response.WriteAsync(bytes);
+                            var w = image.Width > image.Height ? wwww : wwww * image.Width / image.Height;
+                            var h = image.Width > image.Height ? wwww * image.Height / image.Width : wwww;
+                            image.Mutate(x => x
+                                .Resize(Math.Min(w, image.Width), Math.Min(h, image.Height))
+                            );
+                            using (var ms = new System.IO.MemoryStream())
+                            {
+                                image.SaveAsPng(ms);
+                                var bytes = ms.GetBuffer();
+                                await context.Response.WriteAsync(bytes);
+                            }
                         }
+
+                        var ss1 = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
+                        var ss2 = System.Drawing.Imaging.ImageCodecInfo.GetImageDecoders();
+
+                        // var rr = new System.Drawing.PSD.PsdFile();
+                        //var r2r= System.Drawing.PSD.ImageDecoder.DecodeImage(rr.Load(""));
+
+                        //var imgS = new System.Drawing.Bitmap(inStream);
+                        //var img = imgS.GetThumbnailImage(Math.Min(wwww, imgS.Width), Math.Min(wwww, imgS.Height), () => true, IntPtr.Zero);
+                        //using (var ms = new System.IO.MemoryStream())
+                        //{
+                        //    img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                        //    var bytes = ms.GetBuffer();
+                        //    await context.Response.WriteAsync(bytes);
+                        //}
                         return true;
                     }
                     catch (Exception ex)
