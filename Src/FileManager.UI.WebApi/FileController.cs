@@ -50,7 +50,7 @@ namespace FileManagerCore.Controllers
                 {
                     var stream = new System.IO.MemoryStream();
                     await r.CopyToAsync(stream);
-                    return stream.GetBuffer();
+                    return stream.ToArray();
                 }
             }
             catch (Exception ex)
@@ -79,7 +79,7 @@ namespace FileManagerCore.Controllers
                         {
                             var stream = new System.IO.MemoryStream();
                             r.CopyToAsync(stream).Wait();
-                            return stream.GetBuffer();
+                            return stream.ToArray();
                         }
                     }).ToArray();
                 return fileBytes;
