@@ -78,7 +78,7 @@ namespace FileManager
         }
         private static void initRoute(RouteCollection routes, IServiceProvider applicationServices)
         {
-            Configuration.Default.Configure(new SixLabors.ImageSharp.Formats.Psd.PsdConfigurationModule());
+            //Configuration.Default.Configure(new SixLabors.ImageSharp.Formats.Psd.PsdConfigurationModule());
 
             var assembly = GetExecutingAssembly();
             routes.Add("", new RedirectDispatcher((uriMatch) => uriMatch.Value + "/"));
