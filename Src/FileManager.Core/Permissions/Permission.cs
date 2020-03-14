@@ -1,4 +1,4 @@
-﻿namespace FileManager.UI.Explorer
+﻿namespace FileManager.FileStorage
 {
     public enum Permission
     {

@@ -47,6 +47,7 @@ namespace FileManagerCore3
             //.AddFtpStore("ftp://10.11.1.15/", 21, "mccj", "123")
             //.AddWebDavStore(new System.Uri("http://10.11.11.11/remote.php/webdav/"), "mccj", "123")
             //.AddCompressStore(System.IO.File.OpenRead(@"D:\Users\mccj\Source\Repos\FileManager\Test\FileManagerTest\wwwroot\AspNetCore-2.2.6.zip"))
+            //.AddPermissionHandle((sp, f) => Task.FromResult(FileManager.FileStorage.Permission.Compress))
             );
             services.AddNSwagSwagger();
             services.AddHealthChecks();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FileManager
@@ -22,6 +23,22 @@ namespace FileManager
             return AddFileStore(app, sp =>
             {
                 return fileStore;
+            });
+        }
+        public static FileServicesOptions AddPermissionHandle(this FileServicesOptions app, Func<System.IServiceProvider, FileStorage.IFileStoreEntry, Task<FileStorage.Permission>> func)
+        {
+            app.Services.AddSingleton<FileStorage.IPermissions>((sp) =>
+            {
+                return new FileStorage.DefaultPermissions(f => func(sp, f));
+            });
+
+            return app;
+        }
+        public static FileServicesOptions AddPermissionHandle(this FileServicesOptions app, Func<FileStorage.IFileStoreEntry, Task<FileStorage.Permission>> func)
+        {
+            return AddPermissionHandle(app, (sp, fs) =>
+            {
+                return func(fs);
             });
         }
     }

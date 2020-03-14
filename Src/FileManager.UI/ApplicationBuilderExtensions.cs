@@ -8,6 +8,8 @@ namespace FileManager
     {
         public static IServiceCollection AddFileManager(this IServiceCollection services, System.Action<FileServicesOptions> action = null)
         {
+            services.AddSingleton<FileStorage.DefaultPermissionHandle>();
+
             var r = new FileServicesOptions() { Services = services };
             if (action == null)
                 r.AddWebRootFileProviderReadOnly();

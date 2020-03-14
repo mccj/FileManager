@@ -139,17 +139,17 @@ namespace FileManager
 
             routes.AddCommand("/Filemanager/ListFolder", async context =>
              {//读取压缩包的内容
-                 var rr = await context.Request.GetBodyModelBinderAsync<ListFolderParameters>();
-                 var dsfsdf = System.Text.RegularExpressions.Regex.Match(rr?.Path, "\\[(?<drive>.*)\\]:(?<path>.*)");
-                 var drive = dsfsdf.Result("${drive}");
-                 var path = dsfsdf.Result("${path}");
-                 var f = applicationServices.GetService<FileStorage.IFileStore>();
-                 var rr11 = await f.GetDirectoryContentAsync(path);
+                 var folderParameters = await context.Request.GetBodyModelBinderAsync<ListFolderParameters>();
 
+                 var match = System.Text.RegularExpressions.Regex.Match(folderParameters?.Path, "\\[(?<drive>.*)\\]:(?<path>.*)");
+                 var drive = match.Result("${drive}");
+                 var path = match.Result("${path}");
+                 var fileStore = applicationServices.GetService<FileStorage.IFileStore>();
+                 var permissions = applicationServices.GetService<FileStorage.DefaultPermissionHandle>();
+                 var fileStoreEntries = await fileStore.GetDirectoryContentAsync(path);
 
-
-                 var folders = rr11.Where(ff => ff.IsDirectory).Select(ff => new object[] { ff.Name, null, null/*".jpg|*.png|*.bmp|*.gif"*/, true, null, ff.LastModifiedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK") }).ToArray();
-                 var files = rr11.Where(ff => !ff.IsDirectory).Select(ff => new object[] { ff.Name, ff.Length, null, ff.LastModifiedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK") }).ToArray();
+                 var folders = fileStoreEntries.Where(ff => ff.IsDirectory).Select(ff => new object[] { ff.Name, permissions.GetPermissionAsync(ff).Result, null/*".jpg|*.png|*.bmp|*.gif"*/, true, null, ff.LastModifiedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK") }).ToArray();
+                 var files = fileStoreEntries.Where(ff => !ff.IsDirectory).Select(ff => new object[] { ff.Name, ff.Length, null, ff.LastModifiedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK") }).ToArray();
 
                  //文件  ：name,size,systemType,dateModified
                  //文件夹：name,permissions,fileTypes,size,systemType,dateModified
