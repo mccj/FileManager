@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;NET461</TargetFrameworks>
-    <Version>1.0.0</Version>
+	  <TargetFrameworks>netstandard2.1;netstandard2.0;NET461</TargetFrameworks>
+	  <Version>1.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="FtpStore.CoreFtp\**" />
@@ -9,7 +9,7 @@
     <None Remove="FtpStore.CoreFtp\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FluentFTP" Version="28.0.5" />
+    <PackageReference Include="FluentFTP" Version="36.1.0" />
     <!--<PackageReference Include="Ftp.dll" Version="2.0.19002.942" />-->
   </ItemGroup>
   <ItemGroup>
