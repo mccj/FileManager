@@ -15,7 +15,7 @@
 
     <PackageReference Include="AspNetCoreDashboard" Version="1.0.0-beta-14" />
 
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.7" />
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
     <!--<PackageReference Include="sharpcompress" Version="0.24.0" />
     <PackageReference Include="SharpZipLib" Version="1.2.0" />-->
