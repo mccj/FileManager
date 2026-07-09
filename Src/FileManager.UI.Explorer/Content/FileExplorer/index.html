@@ -1,6 +1,12 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+    <script>
+        if (!location.pathname.endsWith('/')) {
+            location.replace(location.pathname + '/' + location.search + location.hash);
+        }
+    </script>
+    <base href="./">
     <title>
         FileExplorer
     </title>

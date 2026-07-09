@@ -25,7 +25,7 @@ namespace FileManager.Storage.Compress
             return await Task.Run<IFileStoreEntry>(() =>
             {
                 _zipFileStream.Position = 0;
-                using (var reader = ReaderFactory.Open(_zipFileStream, new ReaderOptions { Password = _password }))
+                using (var reader = ReaderFactory.OpenReader(_zipFileStream, new ReaderOptions { Password = _password }))
                 {
                     while (reader.MoveToNextEntry())
                     {
@@ -43,7 +43,7 @@ namespace FileManager.Storage.Compress
             return await Task.Run<IFileStoreEntry>(() =>
             {
                 _zipFileStream.Position = 0;
-                using (var reader = ReaderFactory.Open(_zipFileStream, new ReaderOptions { Password = _password }))
+                using (var reader = ReaderFactory.OpenReader(_zipFileStream, new ReaderOptions { Password = _password }))
                 {
                     while (reader.MoveToNextEntry())
                     {
@@ -63,7 +63,7 @@ namespace FileManager.Storage.Compress
                 try
                 {
                     _zipFileStream.Position = 0;
-                    using (var reader = ReaderFactory.Open(_zipFileStream, new ReaderOptions { Password = _password }))
+                    using (var reader = ReaderFactory.OpenReader(_zipFileStream, new ReaderOptions { Password = _password }))
                     {
                         var list = new List<IFileStoreEntry>();
                         while (reader.MoveToNextEntry())
@@ -76,7 +76,7 @@ namespace FileManager.Storage.Compress
                         return list;
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     throw;
                 }
@@ -109,7 +109,7 @@ namespace FileManager.Storage.Compress
             return await Task.Run<Stream>(() =>
             {
                 _zipFileStream.Position = 0;
-                using (var reader = ReaderFactory.Open(_zipFileStream, new ReaderOptions { Password = _password }))
+                using (var reader = ReaderFactory.OpenReader(_zipFileStream, new ReaderOptions { Password = _password }))
                 {
                     var list = new List<IFileStoreEntry>();
                     while (reader.MoveToNextEntry())

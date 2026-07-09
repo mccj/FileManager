@@ -31,10 +31,9 @@ namespace FileManagerCore.Controllers
                 await _fileStore.CreateFileFromStreamAsync(model.Path, stream);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return BadRequest(ModelState);
-                //throw ex;
             }
         }
         [HttpPost]

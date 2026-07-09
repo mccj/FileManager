@@ -1,29 +1,69 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+
+
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0;NET461</TargetFrameworks>
+
+    <TargetFrameworks>net8.0;netstandard2.1;netstandard2.0;net48</TargetFrameworks>
+
     <Version>1.0.0</Version>
+
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+
   </PropertyGroup>
 
+
+
   <ItemGroup>
+
     <None Remove="Content\FileExplorer\**" />
-    <EmbeddedResource Include="Content\FileExplorer\**" />
+
+    <Compile Remove="Content\FileExplorer\**" />
+
   </ItemGroup>
 
+
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="6.0.0" />
 
-    <PackageReference Include="AspNetCoreDashboard" Version="1.0.0-beta-14" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.9" />
 
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
-    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
-    <!--<PackageReference Include="sharpcompress" Version="0.24.0" />
-    <PackageReference Include="SharpZipLib" Version="1.2.0" />-->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.11" />
+
+    <PackageReference Include="AspNetCoreDashboard.Abstractions" Version="1.0.0-beta-20" />
+
   </ItemGroup>
 
+
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+
+    <PackageReference Include="AspNetCoreDashboard" Version="1.0.0-beta-20" />
+
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+
+  </ItemGroup>
+
+
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.13" />
+
+  </ItemGroup>
+
+
+
+
   <ItemGroup>
-    <!--<ProjectReference Include="..\..\..\SixLabors.ImageSharp.Formats.PSD\SixLabors.ImageSharp.Formats.PSD\SixLabors.ImageSharp.Formats.Psd.csproj" />-->
+
     <ProjectReference Include="..\FileManager.Core\FileManager.Core.csproj" />
+
   </ItemGroup>
+
+
 
 </Project>
+

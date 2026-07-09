@@ -12,14 +12,13 @@ namespace FileManager
     public class FileManagerController
     {
         private readonly IFileManagerProvider _fileManager;
-        private readonly FileStorage.IFileStore _fileStore;
         private readonly FileExtensionContentTypeProvider fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
 
-        public FileManagerController(//IFileManagerProvider fileManager, 
-            FileStorage.IFileStore fileStore)
+        public FileManagerController(FileStorage.IFileStore fileStore)
         {
-            //this._fileManager = fileManager;
-            this._fileStore = fileStore;
+            if (fileStore == null)
+                throw new ArgumentNullException(nameof(fileStore));
+            _fileManager = new FileManagerProvider(fileStore);
         }
 
         public ActionResult Index(string mode, string path, string name,

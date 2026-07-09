@@ -1,11 +1,11 @@
-﻿using AspNetCoreDashboard;
-using AspNetCoreDashboard.Dashboard;
+﻿using AspNetCoreDashboard.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.StaticFiles;
 using Newtonsoft.Json;
-//using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using IAppBuilder = Microsoft.AspNetCore.Builder.IApplicationBuilder;
@@ -33,38 +33,11 @@ namespace FileManager
     /// GraphicsEngine
     /// VideoEngine
     /// </summary>
-    public static class ApplicationBuilderExtensions
+    public static class FileExplorerApplicationBuilderExtensions
     {
         public static void UseFileExplorerUI(this FileManagerOptions app)
         {
-            app.Fun = new System.Action(() =>
-            {
-                app.ApplicationBuilder.UseFileManager(app.PathMatch);
-            });
-        }
-        private static IAppBuilder UseFileManager(this IAppBuilder app, string pathMatch, IEnumerable<IDashboardAuthorizationFilter> authorization = null)
-        {
-            if (app == null) throw new ArgumentNullException(nameof(app));
-            if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
-            //if (provider == null) throw new ArgumentNullException(nameof(provider));
-
-            //var services = app.ApplicationServices;
-            //var options = /*options ?? services.GetService<DashboardOptions>() ??*/ new DashboardOptions() { Authorization = authorizationFilters };
-            var routes = /*services.GetService<RouteCollection>()??*/ new RouteCollection();
-
-            initRoute(routes, app.ApplicationServices);
-            //app.Map(new PathString(pathMatch), x => x.UseMiddleware<AspNetCoreFileManagerMiddleware>(/*storage, */options, routes));
-            app.UseFileManager(pathMatch, routes, authorization);
-            return app;
-        }
-        private static IAppBuilder UseFileManager(this IAppBuilder app, string pathMatch, RouteCollection routes, IEnumerable<IDashboardAuthorizationFilter> authorization = null)
-        {
-            if (app == null) throw new ArgumentNullException(nameof(app));
-            if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
-            if (routes == null) throw new ArgumentNullException(nameof(routes));
-
-            app.UseMapDashboard(pathMatch, routes, authorization);
-            return app;
+            app.UiModuleKind = "explorer";
         }
         private static FileExtensionContentTypeProvider fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
         private static string getMimeMapping(string fileName)
@@ -76,22 +49,16 @@ namespace FileManager
             else
                 return "application/x-msdownload";
         }
-        private static void initRoute(RouteCollection routes, IServiceProvider applicationServices)
+        internal static void ConfigureFileExplorerRoutes(IUiModuleRegistration builder)
         {
-            //Configuration.Default.Configure(new SixLabors.ImageSharp.Formats.Psd.PsdConfigurationModule());
-
             var assembly = GetExecutingAssembly();
-            routes.Add("", new RedirectDispatcher((uriMatch) => uriMatch.Value + "/"));
-            routes.Add("/", new EmbeddedResourceDispatcher(System.Net.Mime.MediaTypeNames.Text.Html, assembly, GetContentResourceName("FileExplorer", "index.html")));
-            routes.AddEmbeddedResource(assembly, "/Resource/(?<path>.+\\.js)", "application/javascript", GetContentFolderNamespace("FileExplorer"));
-            routes.AddEmbeddedResource(assembly, "/Resource/(?<path>.+\\.css)", "text/css", GetContentFolderNamespace("FileExplorer"));
-            routes.AddEmbeddedResource(assembly, "/Resource/(?<path>.+\\.png)", "image/png", GetContentFolderNamespace("FileExplorer"));
-            routes.AddEmbeddedResource(assembly, "/Resource/(?<path>.+\\.gif)", "image/gif", GetContentFolderNamespace("FileExplorer"));
-            routes.AddEmbeddedResource(assembly, "/Resource/(?<path>.+\\.ttf)", "application/font-sfnt", GetContentFolderNamespace("FileExplorer"));
-            routes.AddEmbeddedResource(assembly, "/Resource/(?<path>.+\\.woff)", "application/font-woff", GetContentFolderNamespace("FileExplorer"));
-            routes.AddEmbeddedResource(assembly, "/Resource/webviewer/(?<path>.+\\.html)", "text/html", GetContentFolderNamespace("FileExplorer.webviewer"));
-            routes.AddEmbeddedResource(assembly, "/Resource/(?<path>.+\\.swf)", "application/x-shockwave-flash", GetContentFolderNamespace("FileExplorer"));
-            routes.AddCommand("/localization", async context =>
+            var contentNs = GetContentFolderNamespace("FileExplorer");
+
+            builder.MapGet("", ctx => ctx.RedirectAsync(ctx.Path.TrimEnd('/') + "/"))
+                   .MapEmbeddedUi(assembly, contentNs)
+                   .MapGet("/Resource/{*path}", ctx => ServeEmbeddedResource(ctx, assembly, contentNs))
+                   .MapFallbackToIndex(GetContentResourceName("FileExplorer", "index.html"));
+            builder.MapCommand("/localization", async context =>
             {
                 var display = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("display") : context.Request.GetQuery("display");
                 var format = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("format") : context.Request.GetQuery("format");
@@ -123,9 +90,8 @@ namespace FileManager
                 var javascript = javascriptSource.Replace("{${lang}$}", display).Replace("{${culture}$}", format ?? "en-US").Replace("\"{${entries}$}\"", json);
                 context.Response.ContentType = "application/javascript";
                 await context.Response.WriteAsync(javascript);
-                return true;
             });
-            routes.AddCommand("/localization.json", async context =>
+            builder.MapCommand("/localization.json", async context =>
             {
                 var display = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("display") : context.Request.GetQuery("display");
 
@@ -134,18 +100,17 @@ namespace FileManager
                 var json = new System.IO.StreamReader(stream).ReadToEnd();
                 context.Response.ContentType = "application/json";
                 await context.Response.WriteAsync(json);
-                return true;
             });
 
-            routes.AddCommand("/Filemanager/ListFolder", async context =>
+            builder.MapCommand("/Filemanager/ListFolder", async context =>
              {//读取压缩包的内容
                  var folderParameters = await context.Request.GetBodyModelBinderAsync<ListFolderParameters>();
 
                  var match = System.Text.RegularExpressions.Regex.Match(folderParameters?.Path, "\\[(?<drive>.*)\\]:(?<path>.*)");
                  var drive = match.Result("${drive}");
                  var path = match.Result("${path}");
-                 var fileStore = applicationServices.GetService<FileStorage.IFileStore>();
-                 var permissions = applicationServices.GetService<FileStorage.DefaultPermissionHandle>();
+                 var fileStore = context.Services.GetService<FileStorage.IFileStore>();
+                 var permissions = context.Services.GetService<FileStorage.DefaultPermissionHandle>();
                  var fileStoreEntries = await fileStore.GetDirectoryContentAsync(path);
 
                  var folders = fileStoreEntries.Where(ff => ff.IsDirectory).Select(ff => new object[] { ff.Name, permissions.GetPermissionAsync(ff).Result, null/*".jpg|*.png|*.bmp|*.gif"*/, true, null, ff.LastModifiedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK") }).ToArray();
@@ -220,15 +185,14 @@ namespace FileManager
                  //               {
                  //                   context.Response.WriteAsync(fileResult.FileBytes);
                  //               }
-                 return true;
              });
-            routes.AddCommand("/Filemanager/ExpandFolder", async context =>
+            builder.MapCommand("/Filemanager/ExpandFolder", async context =>
             {
                 var rr = await context.Request.GetBodyModelBinderAsync<ListFolderParameters>();
                 var dsfsdf = System.Text.RegularExpressions.Regex.Match(rr?.Path, "\\[(?<drive>.*)\\]:(?<path>.*)");
                 var drive = dsfsdf.Result("${drive}");
                 var path = dsfsdf.Result("${path}");
-                var f = applicationServices.GetService<FileStorage.IFileStore>();
+                var f = context.Services.GetService<FileStorage.IFileStore>();
                 var rr11 = await f.GetDirectoryContentAsync(path);
 
                 //文件  ：name,size,systemType,dateModified
@@ -244,15 +208,14 @@ namespace FileManager
                     }
                 };
                 await context.Response.JsonAsync(r);
-                return true;
             });
-            routes.AddCommand("/Filemanager/Delete", async context =>
+            builder.MapCommand("/Filemanager/Delete", async context =>
             {
                 var rr = await context.Request.GetBodyModelBinderAsync<DeleteParameters>();
                 var dsfsdf = System.Text.RegularExpressions.Regex.Match(rr?.Path, "\\[(?<drive>.*)\\]:(?<path>.*)");
                 var drive = dsfsdf.Result("${drive}");
                 var path = dsfsdf.Result("${path}");
-                var f = applicationServices.GetService<FileStorage.IFileStore>();
+                var f = context.Services.GetService<FileStorage.IFileStore>();
 
                 try
                 {
@@ -286,15 +249,14 @@ namespace FileManager
                     };
                     await context.Response.JsonAsync(r);
                 }
-                return true;
             });
-            routes.AddCommand("/Filemanager/Rename", async context =>
+            builder.MapCommand("/Filemanager/Rename", async context =>
             {
                 var rr = await context.Request.GetBodyModelBinderAsync<RenameParameters>();
                 var dsfsdf = System.Text.RegularExpressions.Regex.Match(rr?.Path, "\\[(?<drive>.*)\\]:(?<path>.*)");
                 var drive = dsfsdf.Result("${drive}");
                 var path = dsfsdf.Result("${path}");
-                var f = applicationServices.GetService<FileStorage.IFileStore>();
+                var f = context.Services.GetService<FileStorage.IFileStore>();
 
                 try
                 {
@@ -326,15 +288,14 @@ namespace FileManager
                     };
                     await context.Response.JsonAsync(r);
                 }
-                return true;
             });
-            routes.AddCommand("/Filemanager/Create", async context =>
+            builder.MapCommand("/Filemanager/Create", async context =>
             {
                 var rr = await context.Request.GetBodyModelBinderAsync<CreateParameters>();
                 var dsfsdf = System.Text.RegularExpressions.Regex.Match(rr?.Path, "\\[(?<drive>.*)\\]:(?<path>.*)");
                 var drive = dsfsdf.Result("${drive}");
                 var path = dsfsdf.Result("${path}");
-                var f = applicationServices.GetService<FileStorage.IFileStore>();
+                var f = context.Services.GetService<FileStorage.IFileStore>();
 
                 try
                 {
@@ -364,9 +325,8 @@ namespace FileManager
                     };
                     await context.Response.JsonAsync(r);
                 }
-                return true;
             });
-            routes.AddCommand("/Filemanager/Copy", async context =>
+            builder.MapCommand("/Filemanager/Copy", async context =>
             {
                 var rr = await context.Request.GetBodyModelBinderAsync<CopyParameters>();
                 var dsfsdf = System.Text.RegularExpressions.Regex.Match(rr?.Path, "\\[(?<drive>.*)\\]:(?<path>.*)");
@@ -378,7 +338,7 @@ namespace FileManager
                 var pathTarget = dsfsdfTarget.Result("${path}");
 
 
-                var f = applicationServices.GetService<FileStorage.IFileStore>();
+                var f = context.Services.GetService<FileStorage.IFileStore>();
 
                 try
                 {
@@ -414,9 +374,8 @@ namespace FileManager
                     await context.Response.JsonAsync(r);
                 }
 
-                return true;
             });
-            routes.AddCommand("/Filemanager/Move", async context =>
+            builder.MapCommand("/Filemanager/Move", async context =>
             {
                 var rr = await context.Request.GetBodyModelBinderAsync<CopyParameters>();
                 var dsfsdf = System.Text.RegularExpressions.Regex.Match(rr?.Path, "\\[(?<drive>.*)\\]:(?<path>.*)");
@@ -428,7 +387,7 @@ namespace FileManager
                 var pathTarget = dsfsdfTarget.Result("${path}");
 
 
-                var f = applicationServices.GetService<FileStorage.IFileStore>();
+                var f = context.Services.GetService<FileStorage.IFileStore>();
 
                 try
                 {
@@ -463,9 +422,8 @@ namespace FileManager
                     await context.Response.JsonAsync(r);
                 }
 
-                return true;
             });
-            routes.AddCommand("/Filemanager/AddToZip", async context =>
+            builder.MapCommand("/Filemanager/AddToZip", async context =>
             {
                 var r = new
                 {
@@ -476,9 +434,8 @@ namespace FileManager
                     }
                 };
                 await context.Response.JsonAsync(r);
-                return true;
             });
-            routes.AddCommand("/Filemanager/ExtractAll", async context =>
+            builder.MapCommand("/Filemanager/ExtractAll", async context =>
             {
                 var r = new
                 {
@@ -489,10 +446,9 @@ namespace FileManager
                     }
                 };
                 await context.Response.JsonAsync(r);
-                return true;
             });
 
-            routes.AddCommand("/Filemanager/GetThumbnail", async context =>
+            builder.MapCommand("/Filemanager/GetThumbnail", async context =>
             {
                 var mpath = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("path") : context.Request.GetQuery("path");
                 var fileName = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("fileName") : context.Request.GetQuery("fileName");
@@ -500,7 +456,7 @@ namespace FileManager
                 var dsfsdf = System.Text.RegularExpressions.Regex.Match(mpath, "\\[(?<drive>.*)\\]:(?<path>.*)");
                 var drive = dsfsdf.Result("${drive}");
                 var path = dsfsdf.Result("${path}");
-                var f = applicationServices.GetService<FileStorage.IFileStore>();
+                var f = context.Services.GetService<FileStorage.IFileStore>();
                 var inStream = await f.GetFileStreamAsync(path + "/" + fileName);
 
                 context.Response.ContentType = getMimeMapping(fileName);
@@ -525,23 +481,8 @@ namespace FileManager
                             }
                         }
 
-                        var ss1 = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
-                        var ss2 = System.Drawing.Imaging.ImageCodecInfo.GetImageDecoders();
-
-                        // var rr = new System.Drawing.PSD.PsdFile();
-                        //var r2r= System.Drawing.PSD.ImageDecoder.DecodeImage(rr.Load(""));
-
-                        //var imgS = new System.Drawing.Bitmap(inStream);
-                        //var img = imgS.GetThumbnailImage(Math.Min(wwww, imgS.Width), Math.Min(wwww, imgS.Height), () => true, IntPtr.Zero);
-                        //using (var ms = new System.IO.MemoryStream())
-                        //{
-                        //    img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                        //    var bytes = ms.GetBuffer();
-                        //    await context.Response.WriteAsync(bytes);
-                        //}
-                        return true;
                     }
-                    catch (Exception ex)
+                    catch
                     {
                     }
                 }
@@ -549,9 +490,8 @@ namespace FileManager
 
 
                 //await context.Response.CopyToAsync(rr11);
-                return true;
             });
-            routes.AddCommand(new[] { "/Filemanager/Preview", "/Filemanager/Preview/(?<fileName>.*)" }, async context =>
+            builder.MapCommand(new[] { "/Filemanager/Preview", "/Filemanager/Preview/(?<fileName>.*)" }, async context =>
              {
                  var previewerType = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("previewerType") : context.Request.GetQuery("previewerType");
                  var stateId = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("stateId") : context.Request.GetQuery("stateId");
@@ -600,7 +540,7 @@ namespace FileManager
                                  showSidePane = true,
                                  singlePageRotation = false,
 
-                                 downloadUrl = $"../../Filemanager/Download?stateId={stateId}&path={Uri.EscapeUriString(mpath)}&openInBrowser=false&fileName={fileName}",
+                                 downloadUrl = $"../../Filemanager/Download?stateId={stateId}&path={Uri.EscapeDataString(mpath)}&openInBrowser=false&fileName={fileName}",
                                  downloadAsPdfUrl = $"../../DocumentViewer/DownloadAsPdf?stateId={stateId}&cacheInfoKey={cacheInfoKey}",
                              }
                          ).Replace("\"", "\\\""));
@@ -614,15 +554,14 @@ namespace FileManager
                  }
                  else
                  {
-                     var f = applicationServices.GetService<FileStorage.IFileStore>();
+                     var f = context.Services.GetService<FileStorage.IFileStore>();
                      var rr11 = await f.GetFileStreamAsync(path + "/" + fileName);
 
                      await context.Response.FileAsync(rr11, getMimeMapping(fileName));
                  }
 
-                 return true;
              });
-            routes.AddCommand(new[] { "/Filemanager/GetImage", "/Filemanager/Download", "/Filemanager/Download/(?<fileName>.*)" }, async context =>
+            builder.MapCommand(new[] { "/Filemanager/GetImage", "/Filemanager/Download", "/Filemanager/Download/(?<fileName>.*)" }, async context =>
             {
                 var mpath = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("path") : context.Request.GetQuery("path");
                 var fileName = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("fileName") : context.Request.GetQuery("fileName");
@@ -647,7 +586,7 @@ namespace FileManager
                     fpath = path;
                 }
 
-                var f = applicationServices.GetService<FileStorage.IFileStore>();
+                var f = context.Services.GetService<FileStorage.IFileStore>();
                 var rr11 = await f.GetFileStreamAsync(fpath);
                 bool.TryParse(openInBrowser, out bool result);
                 if (result)
@@ -658,9 +597,8 @@ namespace FileManager
                 {
                     await context.Response.FileAsync(rr11, "application/octet-stream", fileName);
                 }
-                return true;
             });
-            routes.AddCommand("/Filemanager/DownloadAsZip", async context =>
+            builder.MapCommand("/Filemanager/DownloadAsZip", async context =>
             {
                 var html = @"<!DOCTYPE html>
 <html>
@@ -692,13 +630,12 @@ namespace FileManager
 
                 context.Response.ContentType = "text/html";
                 await context.Response.WriteAsync(html);
-                return true;
             });
 
-            routes.AddCommand("/Fileuploader/Begin", async context =>
+            builder.MapCommand("/Fileuploader/Begin", async context =>
             {
-                var f = applicationServices.GetService<FileStorage.IFileStore>();
-                IMemoryCache memoryCache = applicationServices.GetService<IMemoryCache>();
+                var f = context.Services.GetService<FileStorage.IFileStore>();
+                IMemoryCache memoryCache = context.Services.GetService<IMemoryCache>();
                 var rr = await context.Request.GetBodyModelBinderAsync<UploaderBegin>();
 
                 memoryCache.Set(rr.UploadId, rr, new TimeSpan(2, 0, 0));
@@ -725,9 +662,8 @@ namespace FileManager
                     })
                 };
                 await context.Response.JsonAsync(r);
-                return true;
             });
-            routes.AddCommand("/Fileuploader/SendStream", async context =>
+            builder.MapCommand("/Fileuploader/SendStream", async context =>
             {
                 try
                 {
@@ -740,10 +676,10 @@ namespace FileManager
                     var chunk = context.Request.GetQuery("chunk");
                     var chunks = context.Request.GetQuery("chunks");
 
-                    IMemoryCache memoryCache = applicationServices.GetService<IMemoryCache>();
+                    IMemoryCache memoryCache = context.Services.GetService<IMemoryCache>();
                     var rr = memoryCache.Get<UploaderBegin>(uploadId);
 
-                    var f = applicationServices.GetService<FileStorage.IFileStore>();
+                    var f = context.Services.GetService<FileStorage.IFileStore>();
 
                     var dsfsdf = System.Text.RegularExpressions.Regex.Match(rr?.CustomParameters?.FileManagerPath, "\\[(?<drive>.*)\\]:(?<path>.*)");
                     var drive = dsfsdf.Result("${drive}");
@@ -771,11 +707,10 @@ namespace FileManager
 
                     await context.Response.JsonAsync(r);
                 }
-                return true;
             });
-            routes.AddCommand("/Fileuploader/End", async context =>
+            builder.MapCommand("/Fileuploader/End", async context =>
             {
-                IMemoryCache memoryCache = applicationServices.GetService<IMemoryCache>();
+                IMemoryCache memoryCache = context.Services.GetService<IMemoryCache>();
                 var rr = await context.Request.GetBodyModelBinderAsync<UploaderEnd>();
 
                 memoryCache.Remove(rr.UploadId);
@@ -785,9 +720,8 @@ namespace FileManager
                     Success = true
                 };
                 await context.Response.JsonAsync(r);
-                return true;
             });
-            routes.AddCommand("/Fileuploader/Skip", async context =>
+            builder.MapCommand("/Fileuploader/Skip", async context =>
             {
                 var rr = await context.Request.GetBodyModelBinderAsync<UploaderSkip>();
 
@@ -796,9 +730,8 @@ namespace FileManager
                     Success = true
                 };
                 await context.Response.JsonAsync(r);
-                return true;
             });
-            routes.AddCommand("/Fileuploader/Cancel", async context =>
+            builder.MapCommand("/Fileuploader/Cancel", async context =>
             {
                 var rr = await context.Request.GetBodyModelBinderAsync<UploaderSkip>();
 
@@ -807,9 +740,8 @@ namespace FileManager
                     Success = true
                 };
                 await context.Response.JsonAsync(r);
-                return true;
             });
-            routes.AddCommand("/Fileuploader/KeepSessionAlive", async context =>
+            builder.MapCommand("/Fileuploader/KeepSessionAlive", async context =>
             {
                 var rr = await context.Request.GetBodyModelBinderAsync<ParametersBaseB>();
 
@@ -819,12 +751,11 @@ namespace FileManager
                     Success = true
                 };
                 await context.Response.JsonAsync(r);
-                return true;
             });
 
-            routes.AddCommand("/Fileuploader/Fail", async context =>
+            builder.MapCommand("/Fileuploader/Fail", async context =>
             {
-                IMemoryCache memoryCache = applicationServices.GetService<IMemoryCache>();
+                IMemoryCache memoryCache = context.Services.GetService<IMemoryCache>();
 
                 var rr = await context.Request.GetBodyModelBinderAsync<UploaderFail>();
                 memoryCache.Remove(rr.UploadId);
@@ -834,10 +765,9 @@ namespace FileManager
                     Success = true
                 };
                 await context.Response.JsonAsync(r);
-                return true;
             });
 
-            routes.AddCommand("/DocumentViewer/PrepareDocument", async context =>
+            builder.MapCommand("/DocumentViewer/PrepareDocument", async context =>
             {
                 var rr = await context.Request.GetBodyModelBinderAsync<CacheParameters>();
                 var r = new
@@ -847,9 +777,8 @@ namespace FileManager
                 };
 
                 await context.Response.JsonAsync(r);
-                return true;
             });
-            routes.AddCommand("/DocumentViewer/DownloadDocument", async context =>
+            builder.MapCommand("/DocumentViewer/DownloadDocument", async context =>
             {
                 var stateId = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("stateId") : context.Request.GetQuery("stateId");
                 var cacheInfoKey = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("cacheInfoKey") : context.Request.GetQuery("cacheInfoKey");
@@ -892,9 +821,8 @@ namespace FileManager
                     await context.Response.WriteAsync(bydes);
                 }
 
-                return true;
             });
-            routes.AddCommand("/DocumentViewer/GetLastError", async context =>
+            builder.MapCommand("/DocumentViewer/GetLastError", async context =>
            {
                var rr = await context.Request.GetBodyModelBinderAsync<ParametersBaseB>();
 
@@ -907,18 +835,44 @@ namespace FileManager
                //    }
                //};
                //await context.Response.JsonAsync(r);
-               return await System.Threading.Tasks.Task.FromResult(true);
            });
-            routes.AddCommand("/DocumentViewer/DownloadAsPdf", async context =>
+            builder.MapCommand("/DocumentViewer/DownloadAsPdf", async context =>
             {
                 var stateId = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("stateId") : context.Request.GetQuery("stateId");
                 var cacheInfoKey = context.Request.Method == "POST" ? await context.Request.GetFormValueAsync("cacheInfoKey") : context.Request.GetQuery("cacheInfoKey");
 
                 context.Response.ContentType = "application/pdf";
                 await context.Response.WriteAsync("");
-                return true;
             });
         }
+        private static async Task ServeEmbeddedResource(IUiContext ctx, Assembly assembly, string contentNamespace)
+        {
+            var path = ctx.GetRouteValue("path");
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                ctx.StatusCode = 404;
+                return;
+            }
+
+            var resourceName = EmbeddedResourcePathHelper.ToResourceName(contentNamespace, path);
+            var stream = EmbeddedResourceCache.OpenReadStream(assembly, resourceName)
+                ?? assembly.GetManifestResourceStreamIgnoreCase(resourceName);
+            if (stream == null)
+            {
+                // ToResourceName converts '-' to '_', but some embedded assets keep hyphens (e.g. theme-gray).
+                var literalName = $"{contentNamespace}.{path.Replace('/', '.').Replace('\\', '.')}";
+                stream = assembly.GetManifestResourceStreamIgnoreCase(literalName);
+            }
+
+            if (stream == null)
+            {
+                ctx.StatusCode = 404;
+                return;
+            }
+
+            await ctx.WriteStreamAsync(stream, getMimeMapping(path));
+        }
+
         private static System.Reflection.Assembly GetExecutingAssembly()
         {
             return typeof(ParametersBaseB).GetTypeInfo().Assembly;
@@ -931,34 +885,6 @@ namespace FileManager
         {
             var assemblyName = GetExecutingAssembly().GetName().Name;//"FileManager.UI.Explorer";//typeof(ApplicationBuilderExtensions).Namespace
             return $"{assemblyName}.Content.{contentFolder}";
-        }
-    }
-    public static class DashboardResponse_Extensions
-    {
-        public static void Json(this DashboardResponse response, object data/*, JsonSerializerSettings serializerSettings = null*/)
-        {
-            JsonAsync(response, data).Wait();
-        }
-        public static async System.Threading.Tasks.Task JsonAsync(this DashboardResponse response, object data/*, JsonSerializerSettings serializerSettings = null*/)
-        {
-            var json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
-
-            response.ContentType = "application/json";
-            await response.WriteAsync(json);
-        }
-        public static async System.Threading.Tasks.Task FileAsync(this DashboardResponse response, System.IO.Stream fileStream, string contentType, string fileDownloadName = null)
-        {
-            response.ContentType = contentType;
-            if (!string.IsNullOrWhiteSpace(fileDownloadName))
-                response.SetHeader("Content-Disposition", "attachment;" + "filename=" + Uri.EscapeDataString(fileDownloadName));
-            await response.WriteAsync(fileStream);
-        }
-        public static async System.Threading.Tasks.Task FileAsync(this DashboardResponse response, byte[] fileContents, string contentType, string fileDownloadName)
-        {
-            response.ContentType = contentType;
-            if (!string.IsNullOrWhiteSpace(fileDownloadName))
-                response.SetHeader("Content-Disposition", "attachment;" + "filename=" + Uri.EscapeDataString(fileDownloadName));
-            await response.WriteAsync(fileContents);
         }
     }
 

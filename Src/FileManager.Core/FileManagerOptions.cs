@@ -9,6 +9,7 @@ namespace FileManager
     {
         public PathString PathMatch { get; set; }
         public IApplicationBuilder ApplicationBuilder { get; set; }
+        public string UiModuleKind { get; set; }
         public/* protected internal*/ System.Action Fun { get; set; }
     }
 }

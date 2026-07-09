@@ -21,8 +21,51 @@ Packages
 
 Features
 -------------
-在线文件管理系统
 
+在线文件管理系统，为 ASP.NET Core 应用提供可插拔的文件存储后端与富 UI 前端。
 
+- **多存储后端** — 本地文件系统、FTP、WebDAV、ZIP 压缩包、MongoDB GridFS
+- **多种 UI** — FileExplorer 富管理界面、默认目录浏览、REST API
+- **权限控制** — 基于标志位的细粒度文件/文件夹操作权限
+- **NuGet 分发** — 模块化设计，按需引用
 
-![Dashboard](Docs/images/dashboard-sm.png)
+## 文档
+
+完整文档见 [Docs/](Docs/README.md)：
+
+- [快速开始](Docs/getting-started.md) — 安装与最小配置
+- [架构设计](Docs/architecture.md) — 分层结构与核心接口
+- [存储提供程序](Docs/storage-providers.md) — 各后端配置说明
+- [UI 组件](Docs/ui-components.md) — FileExplorer / 默认浏览
+- [API 参考](Docs/api-reference.md) — Web API 与 SDK
+- [开发指南](Docs/development.md) — 构建、测试与扩展
+
+## 快速示例
+
+```csharp
+// Startup.cs
+services.AddFileManager(f => f
+    .AddRootPhysicalFilePath("/App_Data/Files")
+);
+
+app.UseFileManagerUI("/Browser", f => f.UseFileExplorerUI());
+```
+
+## 项目结构
+
+```
+Src/
+├── FileManager.Core              # IFileStore 抽象与权限
+├── FileManager.Storage.*         # 存储后端（Standard / Ftp / WebDav / Compress / MongoDB）
+├── FileManager.UI                # 默认文件服务 UI
+├── FileManager.UI.Explorer       # FileExplorer 富 UI（推荐）
+├── FileManager.UI.WebApi         # REST API
+└── FileManager.UI.WebApi.Sdk     # HTTP 客户端 SDK
+Samples/                          # 可运行的示例项目
+├── FileManagerTest               # ASP.NET Core 基础示例
+├── FileManagerCore               # 完整示例（含 Swagger）
+└── ConsoleOwinTest               # OWIN 宿主示例
+Test/                             # 自动化测试项目
+├── FileManagerSdkTest            # SDK 调用测试
+└── FileManager.UI.Core.Test      # 单元测试
+```

@@ -80,9 +80,8 @@ namespace FileManager.Storage.MongoDB
                 //var results = ssss.Where(f => 是否当前目录(path, f.Filename)).Select(f => new MongoDBStoreEntry(path, f)).ToArray();
                 return await Task.FromResult(results);
             }
-            catch (Exception ex)
+            catch
             {
-
                 throw;
             }
 

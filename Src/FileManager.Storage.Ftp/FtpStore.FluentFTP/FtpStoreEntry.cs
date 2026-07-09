@@ -17,7 +17,7 @@ namespace FileManager.FileStorage.Ftp
         public string Name => _fileInfo.Name;
         public string DirectoryPath => _path.Substring(0, _path.Length - Name.Length).TrimEnd('/');
         public long Length => _fileInfo.Size;
-        public bool IsDirectory => _fileInfo.Type == FluentFTP.FtpFileSystemObjectType.Directory;
+        public bool IsDirectory => _fileInfo.Type == FluentFTP.FtpObjectType.Directory;
         public DateTimeOffset LastModifiedUtc => _fileInfo.Modified.ToUniversalTime();
         //public DateTime? CreationTimeUtc => _fileInfo.Created.ToUniversalTime();
         //public string Extension => System.IO.Path.GetExtension(_fileInfo.Name);

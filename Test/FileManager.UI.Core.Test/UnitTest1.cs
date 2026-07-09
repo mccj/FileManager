@@ -1,12 +1,13 @@
 using Microsoft.Extensions.FileProviders;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace FileManager.UI.Core.Test
 {
     public class UnitTest1
     {
-        [Fact(Skip = "Ã¯π˝")]
+        [Fact(Skip = "ùùùù")]
         public void Test1()
         {
             //Microsoft.Extensions.FileProviders.Composite.CompositeDirectoryContents
@@ -56,7 +57,7 @@ namespace FileManager.UI.Core.Test
         }
 
         [Fact]
-        public void Test2()
+        public async Task Test2()
         {
             var clientParams = new WebDav.WebDavClientParams
             {
@@ -64,13 +65,13 @@ namespace FileManager.UI.Core.Test
                 Credentials = new System.Net.NetworkCredential("mccj", "123")
             };
             var _client = new WebDav.WebDavClient(clientParams);
-            var result = _client.Propfind("").Result;
-            var result1 = _client.Propfind("/").Result;
-            var result3 = _client.Propfind("/ddddddd").Result;
+            var result = await _client.Propfind("");
+            var result1 = await _client.Propfind("/");
+            var result3 = await _client.Propfind("/ddddddd");
 
-            var result4 = _client.Propfind("Nextcloud.mp4").Result;
+            var result4 = await _client.Propfind("Nextcloud.mp4");
             var ddddd = new WebDav.ProppatchParameters();
-            var result6 = _client.Proppatch("Nextcloud.mp4", ddddd).Result;
+            var result6 = await _client.Proppatch("Nextcloud.mp4", ddddd);
 
         }
     }

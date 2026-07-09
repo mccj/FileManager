@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+#if NET8_0_OR_GREATER
+using AspNetCoreDashboard;
+using AspNetCoreDashboard.Abstractions;
+#endif
 
 namespace FileManager
 {
-    public static class ApplicationBuilderExtensions1111
+    public static class ApplicationBuilderExtensions
     {
         public static IServiceCollection AddFileManager(this IServiceCollection services, System.Action<FileServicesOptions> action = null)
         {
@@ -16,8 +20,12 @@ namespace FileManager
             else
                 action?.Invoke(r);
 
+#if NET8_0_OR_GREATER
+            services.AddUiModules();
+#endif
             return services;
         }
+
         public static IApplicationBuilder UseFileManagerUI(this IApplicationBuilder app, PathString pathMatch, System.Action<FileManagerOptions> action = null)
         {
             var r = new FileManagerOptions() { PathMatch = pathMatch, ApplicationBuilder = app };
@@ -25,9 +33,39 @@ namespace FileManager
                 UseDefaultFileManagerUI(r);
             else
                 action?.Invoke(r);
+
+            if (!string.IsNullOrEmpty(r.UiModuleKind))
+            {
+#if NET8_0_OR_GREATER
+                r.Fun = () => MountUiModule(r);
+#else
+                throw new System.PlatformNotSupportedException("UI modules require a .NET 8+ ASP.NET Core host with AspNetCoreDashboard 3.6.0.");
+#endif
+            }
+
             r.Fun();
             return app;
         }
+
+#if NET8_0_OR_GREATER
+        private static void MountUiModule(FileManagerOptions options)
+        {
+            IUiModule module = options.UiModuleKind switch
+            {
+                "explorer" => new FileExplorerUiModule(options.PathMatch.Value),
+                "richfilemanager" => CreateRichFilemanagerModule(options.PathMatch.Value),
+                _ => throw new System.InvalidOperationException($"Unknown UI module kind: {options.UiModuleKind}")
+            };
+
+            options.ApplicationBuilder.UseUiModule(module);
+        }
+
+        private static IUiModule CreateRichFilemanagerModule(string pathPrefix)
+        {
+            var moduleType = System.Type.GetType("FileManager.RichFilemanagerUiModule, FileManager.UI.RichFilemanager", throwOnError: true);
+            return (IUiModule)System.Activator.CreateInstance(moduleType, pathPrefix);
+        }
+#endif
 
         public static void UseDefaultFileManagerUI(this FileManagerOptions app)
         {
