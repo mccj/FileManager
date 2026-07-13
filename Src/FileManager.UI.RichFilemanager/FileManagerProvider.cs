@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 #if !NETFULL
 using Microsoft.AspNetCore.Http;
@@ -19,17 +20,26 @@ namespace FileManager
             "m4v", "ogg", "mp3", "wav", "zip", "rar", "md"
         };
 
+        private const int SummarizeMaxEntries = 10000;
+
         private readonly IFileStore _fileStore;
+        private readonly DefaultPermissionHandle _permissions;
         private readonly string[] _allowedExtensions;
 
-        public FileManagerProvider(IFileStore fileStore, string[] allowedExtensions = null)
+        public FileManagerProvider(
+            IFileStore fileStore,
+            DefaultPermissionHandle permissions = null,
+            string[] allowedExtensions = null)
         {
             _fileStore = fileStore ?? throw new ArgumentNullException(nameof(fileStore));
+            _permissions = permissions;
             _allowedExtensions = allowedExtensions ?? DefaultAllowedExtensions;
         }
 
-        public Result<ResultInfo> Initiate()
+        public async Task<Result<ResultInfo>> InitiateAsync(CancellationToken cancellationToken = default)
         {
+            var writable = _fileStore.Supports(FileStoreCapabilityFlags.Write)
+                && await HasPermissionAsync(null, Permission.Upload, cancellationToken);
             return new Result<ResultInfo>
             {
                 Data = new ResultInfo
@@ -41,7 +51,7 @@ namespace FileManager
                         {
                             Security = new Security
                             {
-                                ReadOnly = false,
+                                ReadOnly = !writable,
                                 Extensions = new Extensions
                                 {
                                     IgnoreCase = true,
@@ -55,55 +65,63 @@ namespace FileManager
             };
         }
 
-        public Result<ResultInfo[]> SeekFolder(string path, string search)
+        public async Task<Result<ResultInfo[]>> SeekFolderAsync(string path, string search, CancellationToken cancellationToken = default)
         {
             path = Normalize(path);
-            var entries = _fileStore.GetDirectoryContentAsync(path, includeSubDirectories: true)
-                .GetAwaiter().GetResult()
-                .Where(entry => string.IsNullOrEmpty(search)
-                    || entry.Name.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0);
+            await EnsureListPermissionAsync(path, cancellationToken);
+            var entries = await _fileStore.GetDirectoryContentAsync(path, includeSubDirectories: true, cancellationToken);
+            var filtered = entries.Where(entry => string.IsNullOrEmpty(search)
+                || entry.Name.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0);
 
-            return new Result<ResultInfo[]>
+            var results = new List<ResultInfo>();
+            foreach (var entry in filtered)
             {
-                Data = entries.Select(entry => ToResultInfo(entry, entry.Path)).ToArray()
-            };
+                cancellationToken.ThrowIfCancellationRequested();
+                var result = await ToResultInfoAsync(entry, entry.Path, cancellationToken);
+                if (result != null)
+                    results.Add(result);
+            }
+
+            return new Result<ResultInfo[]> { Data = results.ToArray() };
         }
 
-        public Result<ResultInfo> GetInfo(string path)
+        public async Task<Result<ResultInfo>> GetInfoAsync(string path, CancellationToken cancellationToken = default)
         {
             path = Normalize(path);
-            var entry = GetEntry(path);
+            var entry = await GetEntryAsync(path, cancellationToken);
             if (entry == null)
-            {
-                return new Result<ResultInfo>
-                {
-                    Errors = new List<Error>
-                    {
-                        new Error { Code = 404, Title = "NOT_FOUND", Meta = new Meta { Arguments = new List<string> { path } } }
-                    }
-                };
-            }
+                return NotFound<ResultInfo>(path);
 
-            return new Result<ResultInfo> { Data = ToResultInfo(entry, path) };
+            var result = await ToResultInfoAsync(entry, path, cancellationToken);
+            return result == null ? Forbidden<ResultInfo>() : new Result<ResultInfo> { Data = result };
         }
 
-        public Result<ResultInfo[]> ReadFolder(string path)
+        public async Task<Result<ResultInfo[]>> ReadFolderAsync(string path, CancellationToken cancellationToken = default)
         {
             path = Normalize(path);
-            var entries = _fileStore.GetDirectoryContentAsync(path).GetAwaiter().GetResult();
-            return new Result<ResultInfo[]>
+            await EnsureListPermissionAsync(path, cancellationToken);
+            var entries = await _fileStore.GetDirectoryContentAsync(path, cancellationToken: cancellationToken);
+            var results = new List<ResultInfo>();
+            foreach (var entry in entries)
             {
-                Data = entries.Select(entry => ToResultInfo(entry, Combine(path, entry.Name))).ToArray()
-            };
+                var result = await ToResultInfoAsync(entry, Combine(path, entry.Name), cancellationToken);
+                if (result != null)
+                    results.Add(result);
+            }
+
+            return new Result<ResultInfo[]> { Data = results.ToArray() };
         }
 
-        public Result<ResultInfo> AddFolder(string path, string name)
+        public async Task<Result<ResultInfo>> AddFolderAsync(string path, string name, CancellationToken cancellationToken = default)
         {
+            path = Normalize(path);
+            name = VirtualPath.ValidateFileName(name);
+            if (!await HasPermissionAsync(await GetDirectoryEntryAsync(path, cancellationToken), Permission.Create, cancellationToken))
+                return Forbidden<ResultInfo>();
+
             var newPath = Combine(path, name);
-            if (!_fileStore.TryCreateDirectoryAsync(newPath).GetAwaiter().GetResult())
-            {
+            if (!await _fileStore.TryCreateDirectoryAsync(newPath, cancellationToken))
                 return DirectoryExistsError<ResultInfo>(name);
-            }
 
             return new Result<ResultInfo>
             {
@@ -125,82 +143,81 @@ namespace FileManager
         }
 
 #if !NETFULL
-        public Task<Result<List<ResultInfo>>> Upload(string path, IEnumerable<IFormFile> files)
+        public async Task<Result<List<ResultInfo>>> UploadAsync(string path, IEnumerable<IFormFile> files, CancellationToken cancellationToken = default)
         {
-            return Task.Run(() =>
+            var result = new Result<List<ResultInfo>> { Data = new List<ResultInfo>() };
+            path = Normalize(path);
+            if (!await HasPermissionAsync(await GetDirectoryEntryAsync(path, cancellationToken), Permission.Upload, cancellationToken))
+                return Forbidden<List<ResultInfo>>();
+
+            foreach (var file in files ?? Enumerable.Empty<IFormFile>())
             {
-                var result = new Result<List<ResultInfo>> { Data = new List<ResultInfo>() };
-                path = Normalize(path);
+                cancellationToken.ThrowIfCancellationRequested();
+                if (file.Length <= 0)
+                    continue;
 
-                foreach (var file in files ?? Enumerable.Empty<IFormFile>())
+                var safeFileName = VirtualPath.ValidateFileName(file.FileName);
+                if (!VirtualPath.IsExtensionAllowed(safeFileName, _allowedExtensions))
+                    return ExtensionNotAllowedError<List<ResultInfo>>(safeFileName);
+
+                var filePath = Combine(path, safeFileName);
+                if (await GetEntryAsync(filePath, cancellationToken) != null)
+                    return FileExistsError<List<ResultInfo>>(safeFileName);
+
+                await using (var stream = file.OpenReadStream())
                 {
-                    if (file.Length <= 0)
-                        continue;
-
-                    var filePath = Combine(path, file.FileName);
-                    if (GetEntry(filePath) != null)
-                    {
-                        return FileExistsError<List<ResultInfo>>(file.FileName);
-                    }
-
-                    using (var stream = file.OpenReadStream())
-                    {
-                        _fileStore.CreateFileFromStreamAsync(filePath, stream).GetAwaiter().GetResult();
-                    }
-
-                    result.Data.Add(new ResultInfo
-                    {
-                        Id = MakeWebPath(filePath),
-                        Type = InfoType.file,
-                        Attributes = new Attributes
-                        {
-                            Name = file.FileName,
-                            Extension = Path.GetExtension(file.FileName).TrimStart('.'),
-                            Path = MakeWebPath(filePath),
-                            Readable = true,
-                            Writable = true,
-                            Created = DateTime.UtcNow,
-                            Modified = DateTime.UtcNow,
-                            Size = file.Length
-                        }
-                    });
+                    await _fileStore.CreateFileFromStreamAsync(filePath, stream, cancellationToken: cancellationToken);
                 }
 
-                return result;
-            });
+                result.Data.Add(new ResultInfo
+                {
+                    Id = MakeWebPath(filePath),
+                    Type = InfoType.file,
+                    Attributes = new Attributes
+                    {
+                        Name = safeFileName,
+                        Extension = Path.GetExtension(safeFileName).TrimStart('.'),
+                        Path = MakeWebPath(filePath),
+                        Readable = true,
+                        Writable = true,
+                        Created = DateTime.UtcNow,
+                        Modified = DateTime.UtcNow,
+                        Size = file.Length
+                    }
+                });
+            }
+
+            return result;
         }
 #endif
 
-        public Result<ResultInfo> Rename(string old, string @new)
+        public Task<Result<ResultInfo>> RenameAsync(string old, string @new, CancellationToken cancellationToken = default)
         {
-            return Move(old, @new);
+            return MoveAsync(old, @new, cancellationToken);
         }
 
-        public Result<ResultInfo> Move(string old, string @new)
+        public async Task<Result<ResultInfo>> MoveAsync(string old, string @new, CancellationToken cancellationToken = default)
         {
             old = Normalize(old);
             @new = Normalize(@new);
-            var entry = GetEntry(old);
+            var entry = await GetEntryAsync(old, cancellationToken);
             if (entry == null)
-            {
-                return new Result<ResultInfo>
-                {
-                    Errors = new List<Error>
-                    {
-                        new Error { Code = 404, Title = "NOT_FOUND", Meta = new Meta { Arguments = new List<string> { old } } }
-                    }
-                };
-            }
+                return NotFound<ResultInfo>(old);
 
-            if (GetEntry(@new) != null)
-            {
+            if (!await HasPermissionAsync(entry, Permission.Rename | Permission.Cut, cancellationToken))
+                return Forbidden<ResultInfo>();
+
+            var targetParent = GetParentPath(@new);
+            if (!await HasPermissionAsync(await GetDirectoryEntryAsync(targetParent, cancellationToken), Permission.Upload | Permission.Create, cancellationToken))
+                return Forbidden<ResultInfo>();
+
+            if (await GetEntryAsync(@new, cancellationToken) != null)
                 return entry.IsDirectory ? DirectoryExistsError<ResultInfo>(@new) : FileExistsError<ResultInfo>(@new);
-            }
 
             if (entry.IsDirectory)
-                _fileStore.MoveDirectoryAsync(old, @new).GetAwaiter().GetResult();
+                await _fileStore.MoveDirectoryAsync(old, @new, cancellationToken);
             else
-                _fileStore.MoveFileAsync(old, @new).GetAwaiter().GetResult();
+                await _fileStore.MoveFileAsync(old, @new, cancellationToken);
 
             return new Result<ResultInfo>
             {
@@ -220,26 +237,24 @@ namespace FileManager
             };
         }
 
-        public Result<ResultInfo> Copy(string source, string target)
+        public async Task<Result<ResultInfo>> CopyAsync(string source, string target, CancellationToken cancellationToken = default)
         {
             source = Normalize(source);
             target = Normalize(target);
-            var entry = GetEntry(source);
+            var entry = await GetEntryAsync(source, cancellationToken);
             if (entry == null || entry.IsDirectory)
-            {
-                return new Result<ResultInfo>
-                {
-                    Errors = new List<Error>
-                    {
-                        new Error { Code = 404, Title = "NOT_FOUND", Meta = new Meta { Arguments = new List<string> { source } } }
-                    }
-                };
-            }
+                return NotFound<ResultInfo>(source);
 
-            if (GetEntry(target) != null)
+            if (!await HasPermissionAsync(entry, Permission.Copy, cancellationToken))
+                return Forbidden<ResultInfo>();
+
+            if (!await HasPermissionAsync(await GetDirectoryEntryAsync(GetParentPath(target), cancellationToken), Permission.Upload | Permission.Create, cancellationToken))
+                return Forbidden<ResultInfo>();
+
+            if (await GetEntryAsync(target, cancellationToken) != null)
                 return FileExistsError<ResultInfo>(target);
 
-            _fileStore.CopyFileAsync(source, target).GetAwaiter().GetResult();
+            await _fileStore.CopyFileAsync(source, target, cancellationToken);
             return new Result<ResultInfo>
             {
                 Data = new ResultInfo
@@ -258,12 +273,19 @@ namespace FileManager
             };
         }
 
-        public Result<ResultInfo> SaveFile(string path, string content)
+        public async Task<Result<ResultInfo>> SaveFileAsync(string path, string content, CancellationToken cancellationToken = default)
         {
             path = Normalize(path);
+            if (!VirtualPath.IsExtensionAllowed(path, _allowedExtensions))
+                return ExtensionNotAllowedError<ResultInfo>(path);
+
+            var entry = await GetEntryAsync(path, cancellationToken);
+            if (!await HasPermissionAsync(entry ?? await GetDirectoryEntryAsync(GetParentPath(path), cancellationToken), Permission.Edit | Permission.Upload, cancellationToken))
+                return Forbidden<ResultInfo>();
+
             using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content ?? string.Empty)))
             {
-                _fileStore.CreateFileFromStreamAsync(path, stream, overwrite: true).GetAwaiter().GetResult();
+                await _fileStore.CreateFileFromStreamAsync(path, stream, overwrite: true, cancellationToken: cancellationToken);
             }
 
             return new Result<ResultInfo>
@@ -284,25 +306,20 @@ namespace FileManager
             };
         }
 
-        public Result<ResultInfo> Delete(string path)
+        public async Task<Result<ResultInfo>> DeleteAsync(string path, CancellationToken cancellationToken = default)
         {
             path = Normalize(path);
-            var entry = GetEntry(path);
+            var entry = await GetEntryAsync(path, cancellationToken);
             if (entry == null)
-            {
-                return new Result<ResultInfo>
-                {
-                    Errors = new List<Error>
-                    {
-                        new Error { Code = 404, Title = "NOT_FOUND", Meta = new Meta { Arguments = new List<string> { path } } }
-                    }
-                };
-            }
+                return NotFound<ResultInfo>(path);
+
+            if (!await HasPermissionAsync(entry, Permission.Delete, cancellationToken))
+                return Forbidden<ResultInfo>();
 
             if (entry.IsDirectory)
-                _fileStore.TryDeleteDirectoryAsync(path).GetAwaiter().GetResult();
+                await _fileStore.TryDeleteDirectoryAsync(path, cancellationToken);
             else
-                _fileStore.TryDeleteFileAsync(path).GetAwaiter().GetResult();
+                await _fileStore.TryDeleteFileAsync(path, cancellationToken);
 
             return new Result<ResultInfo>
             {
@@ -322,25 +339,24 @@ namespace FileManager
             };
         }
 
-        public byte[] ReadFile(string path)
+        public async Task<Stream> OpenReadAsync(string path, CancellationToken cancellationToken = default)
         {
             path = Normalize(path);
-            using (var stream = _fileStore.GetFileStreamAsync(path).GetAwaiter().GetResult())
-            using (var memoryStream = new MemoryStream())
-            {
-                stream.CopyTo(memoryStream);
-                return memoryStream.ToArray();
-            }
+            var entry = await GetEntryAsync(path, cancellationToken);
+            if (entry == null || entry.IsDirectory)
+                throw new FileStoreException($"The file '{path}' does not exist.");
+
+            if (!await HasPermissionAsync(entry, Permission.Download | Permission.Preview, cancellationToken))
+                throw new FileStoreException("Read access denied.");
+
+            return await _fileStore.GetFileStreamAsync(path, cancellationToken);
         }
 
-        public byte[] GetImage(string path, bool thumbnail)
+        public async Task<Result<ResultInfo>> SummarizeAsync(CancellationToken cancellationToken = default)
         {
-            return ReadFile(path);
-        }
-
-        public Result<ResultInfo> Summarize()
-        {
-            var entries = _fileStore.GetDirectoryContentAsync(includeSubDirectories: true).GetAwaiter().GetResult().ToArray();
+            var entries = (await _fileStore.GetDirectoryContentAsync(includeSubDirectories: true, cancellationToken: cancellationToken))
+                .Take(SummarizeMaxEntries)
+                .ToArray();
             var files = entries.Where(entry => !entry.IsDirectory).ToArray();
             var folders = entries.Where(entry => entry.IsDirectory).ToArray();
 
@@ -355,32 +371,100 @@ namespace FileManager
                         Size = files.Sum(file => file.Length),
                         Files = files.Length,
                         Folders = folders.Length,
-                        SizeLimit = 0
+                        SizeLimit = SummarizeMaxEntries
                     }
                 }
             };
         }
 
-        private IFileStoreEntry GetEntry(string path)
+        private async Task<IFileStoreEntry> GetEntryAsync(string path, CancellationToken cancellationToken)
         {
-            return _fileStore.GetFileInfoAsync(path).GetAwaiter().GetResult()
-                ?? _fileStore.GetDirectoryInfoAsync(path).GetAwaiter().GetResult();
+            return await _fileStore.GetFileInfoAsync(path, cancellationToken)
+                ?? await _fileStore.GetDirectoryInfoAsync(path, cancellationToken);
+        }
+
+        private Task<IFileStoreEntry> GetDirectoryEntryAsync(string path, CancellationToken cancellationToken)
+        {
+            return _fileStore.GetDirectoryInfoAsync(path, cancellationToken);
+        }
+
+        private async Task<bool> HasPermissionAsync(IFileStoreEntry entry, Permission required, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (_permissions == null)
+            {
+                var writeFlags = Permission.Create | Permission.Delete | Permission.Rename | Permission.Upload
+                    | Permission.Edit | Permission.Cut | Permission.Copy | Permission.Paste | Permission.Compress | Permission.Extract;
+                if ((required & writeFlags) != 0)
+                    return false;
+                return true;
+            }
+
+            if (entry == null)
+                return (required & (Permission.ListFiles | Permission.ListSubFolders)) != 0;
+
+            var granted = await _permissions.GetPermissionAsync(entry);
+            return (granted & required) != 0;
+        }
+
+        private async Task EnsureListPermissionAsync(string path, CancellationToken cancellationToken)
+        {
+            var directory = await GetDirectoryEntryAsync(path, cancellationToken);
+            if (directory != null && !await HasPermissionAsync(directory, Permission.ListFiles | Permission.ListSubFolders, cancellationToken))
+                throw new FileStoreException("List access denied.");
+        }
+
+        private async Task<ResultInfo> ToResultInfoAsync(IFileStoreEntry entry, string relativePath, CancellationToken cancellationToken)
+        {
+            relativePath = Normalize(relativePath);
+            var required = entry.IsDirectory
+                ? Permission.ListSubFolders
+                : Permission.Download | Permission.Preview;
+            if (!await HasPermissionAsync(entry, required, cancellationToken))
+                return null;
+
+            var writable = _fileStore.Supports(FileStoreCapabilityFlags.Write)
+                && await HasPermissionAsync(entry, Permission.Upload | Permission.Edit | Permission.Delete | Permission.Rename, cancellationToken);
+
+            return new ResultInfo
+            {
+                Id = MakeWebPath(relativePath, entry.IsDirectory),
+                Type = entry.IsDirectory ? InfoType.folder : InfoType.file,
+                Attributes = new Attributes
+                {
+                    Name = entry.Name,
+                    Path = MakeWebPath(relativePath, entry.IsDirectory),
+                    Readable = true,
+                    Writable = writable,
+                    Modified = entry.LastModifiedUtc.UtcDateTime,
+                    Extension = entry.IsDirectory ? null : Path.GetExtension(entry.Name).TrimStart('.'),
+                    Size = entry.IsDirectory ? (long?)null : entry.Length
+                }
+            };
         }
 
         private static string Normalize(string path)
         {
-            return string.IsNullOrWhiteSpace(path) ? string.Empty : path.Trim('/').Replace('\\', '/');
+            return string.IsNullOrWhiteSpace(path) ? string.Empty : VirtualPath.Normalize(path);
         }
 
         private static string Combine(string path, string name)
         {
             path = Normalize(path);
-            name = Normalize(name);
+            name = VirtualPath.ValidateFileName(name);
             if (string.IsNullOrEmpty(path))
                 return name;
-            if (string.IsNullOrEmpty(name))
-                return path;
             return path + "/" + name;
+        }
+
+        private static string GetParentPath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return string.Empty;
+
+            var index = path.LastIndexOf('/');
+            return index < 0 ? string.Empty : path.Substring(0, index);
         }
 
         private static string MakeWebPath(string path, bool isDirectory = false)
@@ -391,22 +475,24 @@ namespace FileManager
             return path;
         }
 
-        private static ResultInfo ToResultInfo(IFileStoreEntry entry, string relativePath)
+        private static Result<TResult> NotFound<TResult>(string path)
         {
-            relativePath = Normalize(relativePath);
-            return new ResultInfo
+            return new Result<TResult>
             {
-                Id = MakeWebPath(relativePath, entry.IsDirectory),
-                Type = entry.IsDirectory ? InfoType.folder : InfoType.file,
-                Attributes = new Attributes
+                Errors = new List<Error>
                 {
-                    Name = entry.Name,
-                    Path = MakeWebPath(relativePath, entry.IsDirectory),
-                    Readable = true,
-                    Writable = true,
-                    Modified = entry.LastModifiedUtc.UtcDateTime,
-                    Extension = entry.IsDirectory ? null : Path.GetExtension(entry.Name).TrimStart('.'),
-                    Size = entry.IsDirectory ? (long?)null : entry.Length
+                    new Error { Code = 404, Title = "NOT_FOUND", Meta = new Meta { Arguments = new List<string> { path } } }
+                }
+            };
+        }
+
+        private static Result<TResult> Forbidden<TResult>()
+        {
+            return new Result<TResult>
+            {
+                Errors = new List<Error>
+                {
+                    new Error { Code = 403, Title = "FORBIDDEN", Meta = new Meta { Arguments = new List<string>() } }
                 }
             };
         }
@@ -417,12 +503,7 @@ namespace FileManager
             {
                 Errors = new List<Error>
                 {
-                    new Error
-                    {
-                        Code = 500,
-                        Title = "DIRECTORY_ALREADY_EXISTS",
-                        Meta = new Meta { Arguments = new List<string> { name } }
-                    }
+                    new Error { Code = 500, Title = "DIRECTORY_ALREADY_EXISTS", Meta = new Meta { Arguments = new List<string> { name } } }
                 }
             };
         }
@@ -433,12 +514,18 @@ namespace FileManager
             {
                 Errors = new List<Error>
                 {
-                    new Error
-                    {
-                        Code = 500,
-                        Title = "FILE_ALREADY_EXISTS",
-                        Meta = new Meta { Arguments = new List<string> { name } }
-                    }
+                    new Error { Code = 500, Title = "FILE_ALREADY_EXISTS", Meta = new Meta { Arguments = new List<string> { name } } }
+                }
+            };
+        }
+
+        private static Result<TResult> ExtensionNotAllowedError<TResult>(string name)
+        {
+            return new Result<TResult>
+            {
+                Errors = new List<Error>
+                {
+                    new Error { Code = 400, Title = "EXTENSION_NOT_ALLOWED", Meta = new Meta { Arguments = new List<string> { name } } }
                 }
             };
         }

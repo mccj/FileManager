@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -6,7 +6,7 @@ using System.Net.Http.Headers;
 namespace FileManagerSdk
 {
     /// <summary>
-    /// oms系统api
+    /// FileManager REST API 客户端。
     /// </summary>
     public partial interface IFileClient
     {
@@ -41,7 +41,7 @@ namespace FileManagerSdk
         //void SetBasicToken(string token);
     }
     /// <summary>
-    /// oms系统api
+    /// FileManager REST API 客户端。
     /// </summary>
     public partial class FileClient
     {

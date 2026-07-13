@@ -3,123 +3,146 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FileManager.FileStorage.Standard
 {
-    public class FileProviderStore : IFileStore
+    public class FileProviderStore : IFileStore, IFileStoreCapabilities
     {
         private readonly IFileProvider _fileProvider;
+        private static readonly FileStoreCapabilityFlags ReadOnlyCapabilities =
+            FileStoreCapabilityFlags.Read | FileStoreCapabilityFlags.List | FileStoreCapabilityFlags.Download | FileStoreCapabilityFlags.Preview;
 
         public FileProviderStore(IFileProvider fileProvider)
         {
-            _fileProvider = fileProvider;
+            _fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
         }
 
-        public Task<IFileStoreEntry> GetFileInfoAsync(string path)
+        public FileStoreCapabilityFlags Capabilities => ReadOnlyCapabilities;
+
+        public Task<IFileStoreEntry> GetFileInfoAsync(string path, CancellationToken cancellationToken = default)
         {
-            var fileInfo = _fileProvider.GetFileInfo(path);
-            if (fileInfo.Exists)
+            cancellationToken.ThrowIfCancellationRequested();
+            var normalizedPath = this.NormalizePath(path);
+            var fileInfo = _fileProvider.GetFileInfo(normalizedPath ?? string.Empty);
+            if (!fileInfo.Exists || fileInfo.IsDirectory)
+                return Task.FromResult<IFileStoreEntry>(null);
+
+            return Task.FromResult<IFileStoreEntry>(new FileProviderStoreEntry(normalizedPath, fileInfo));
+        }
+
+        public Task<IFileStoreEntry> GetDirectoryInfoAsync(string path, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var normalizedPath = this.NormalizePath(path);
+            var contents = _fileProvider.GetDirectoryContents(normalizedPath ?? string.Empty);
+            if (!contents.Exists)
+                return Task.FromResult<IFileStoreEntry>(null);
+
+            var directoryInfo = _fileProvider.GetFileInfo(normalizedPath ?? string.Empty);
+            if (directoryInfo.Exists && directoryInfo.IsDirectory)
+                return Task.FromResult<IFileStoreEntry>(new FileProviderStoreEntry(normalizedPath ?? string.Empty, directoryInfo));
+
+            return Task.FromResult<IFileStoreEntry>(new FileProviderStoreEntry(
+                normalizedPath ?? string.Empty,
+                new VirtualDirectoryFileInfo(normalizedPath ?? string.Empty)));
+        }
+
+        public Task<IEnumerable<IFileStoreEntry>> GetDirectoryContentAsync(string path = null, bool includeSubDirectories = false, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var normalizedPath = this.NormalizePath(path);
+            var contents = _fileProvider.GetDirectoryContents(normalizedPath ?? string.Empty);
+            if (!contents.Exists)
+                throw new FileStoreException($"The directory '{path}' does not exist.");
+
+            var results = new List<IFileStoreEntry>();
+            CollectEntries(normalizedPath, includeSubDirectories, results, cancellationToken);
+            return Task.FromResult((IEnumerable<IFileStoreEntry>)results);
+        }
+
+        private void CollectEntries(string path, bool includeSubDirectories, List<IFileStoreEntry> results, CancellationToken cancellationToken)
+        {
+            var contents = _fileProvider.GetDirectoryContents(path ?? string.Empty);
+            if (!contents.Exists)
+                return;
+
+            var directories = new List<IFileStoreEntry>();
+            var files = new List<IFileStoreEntry>();
+
+            foreach (var entry in contents)
             {
-                return Task.FromResult<IFileStoreEntry>(new FileSystemStoreEntry(path, fileInfo));
+                cancellationToken.ThrowIfCancellationRequested();
+                var entryPath = string.IsNullOrEmpty(path) ? entry.Name : $"{path}/{entry.Name}";
+                var storeEntry = new FileProviderStoreEntry(this.NormalizePath(entryPath), entry);
+                if (entry.IsDirectory)
+                    directories.Add(storeEntry);
+                else
+                    files.Add(storeEntry);
             }
 
-            return Task.FromResult<IFileStoreEntry>(null);
+            results.AddRange(directories);
+            results.AddRange(files);
+
+            if (includeSubDirectories)
+            {
+                foreach (var directory in directories)
+                    CollectEntries(directory.Path, true, results, cancellationToken);
+            }
         }
 
-        public Task<IFileStoreEntry> GetDirectoryInfoAsync(string path)
+        public Task<Stream> GetFileStreamAsync(string path, CancellationToken cancellationToken = default)
         {
-            var directoryInfo = _fileProvider.GetDirectoryContents(path);
+            cancellationToken.ThrowIfCancellationRequested();
+            var normalizedPath = this.NormalizePath(path);
+            var fileInfo = _fileProvider.GetFileInfo(normalizedPath);
+            if (!fileInfo.Exists || fileInfo.IsDirectory)
+                throw new FileStoreException($"Cannot get file stream because the file '{path}' does not exist.");
 
-            if (directoryInfo.Exists)
+            return Task.FromResult(fileInfo.CreateReadStream());
+        }
+
+        public Task<Stream> GetFileStreamAsync(IFileStoreEntry fileStoreEntry, CancellationToken cancellationToken = default)
+        {
+            return GetFileStreamAsync(fileStoreEntry.Path, cancellationToken);
+        }
+
+        public Task<bool> TryCreateDirectoryAsync(string path, CancellationToken cancellationToken = default) => ThrowReadOnlyAsync<bool>();
+        public Task<bool> TryDeleteFileAsync(string path, CancellationToken cancellationToken = default) => ThrowReadOnlyAsync<bool>();
+        public Task<bool> TryDeleteDirectoryAsync(string path, CancellationToken cancellationToken = default) => ThrowReadOnlyAsync<bool>();
+        public Task MoveFileAsync(string oldPath, string newPath, CancellationToken cancellationToken = default) => ThrowReadOnlyAsync();
+        public Task CopyFileAsync(string srcPath, string dstPath, CancellationToken cancellationToken = default) => ThrowReadOnlyAsync();
+        public Task CreateFileFromStreamAsync(string path, Stream inputStream, bool overwrite = false, CancellationToken cancellationToken = default) => ThrowReadOnlyAsync();
+        public Task MoveDirectoryAsync(string oldPath, string newPath, CancellationToken cancellationToken = default) => ThrowReadOnlyAsync();
+
+        private static Task ThrowReadOnlyAsync()
+        {
+            throw new FileStoreException("FileProviderStore is read-only.");
+        }
+
+        private static Task<T> ThrowReadOnlyAsync<T>()
+        {
+            throw new FileStoreException("FileProviderStore is read-only.");
+        }
+
+        private sealed class VirtualDirectoryFileInfo : IFileInfo
+        {
+            public VirtualDirectoryFileInfo(string path)
             {
-                return Task.FromResult<IFileStoreEntry>(new FileSystemStoreEntry(path, new StoreDirInfo(path)));
+                Name = string.IsNullOrEmpty(path)
+                    ? string.Empty
+                    : path.Substring(path.LastIndexOf('/') + 1);
+                LastModified = DateTimeOffset.UtcNow;
             }
 
-            return Task.FromResult<IFileStoreEntry>(null);
-        }
-
-        public Task<IEnumerable<IFileStoreEntry>> GetDirectoryContentAsync(string path = null, bool includeSubDirectories = false)
-        {
-            var results = _fileProvider.GetDirectoryContents(path);
-            if (!results.Exists)
-            {
-                return Task.FromResult(Enumerable.Empty<IFileStoreEntry>());
-            }
-            var _results = results.Select(f => new FileSystemStoreEntry(this.Combine(path, f.Name), f));
-            return Task.FromResult((IEnumerable<IFileStoreEntry>)_results);
-        }
-
-        public Task<bool> TryCreateDirectoryAsync(string path)
-        {
-            throw new FileStoreException($"不支持.");
-        }
-
-        public Task<bool> TryDeleteFileAsync(string path)
-        {
-            throw new FileStoreException($"不支持.");
-        }
-
-        public Task<bool> TryDeleteDirectoryAsync(string path)
-        {
-            throw new FileStoreException($"不支持.");
-        }
-
-        public Task MoveFileAsync(string oldPath, string newPath)
-        {
-            throw new FileStoreException($"不支持.");
-        }
-
-        public Task CopyFileAsync(string srcPath, string dstPath)
-        {
-            throw new FileStoreException($"不支持.");
-        }
-
-        public Task<Stream> GetFileStreamAsync(string path)
-        {
-            var stream = _fileProvider.GetFileInfo(path).CreateReadStream();
-            return Task.FromResult<Stream>(stream);
-        }
-
-        public Task<Stream> GetFileStreamAsync(IFileStoreEntry fileStoreEntry)
-        {
-            return GetFileStreamAsync(fileStoreEntry.Path);
-        }
-
-        public Task CreateFileFromStreamAsync(string path, Stream inputStream, bool overwrite = false)
-        {
-            throw new FileStoreException($"不支持.");
-        }
-
-        public Task MoveDirectoryAsync(string oldPath, string newPath)
-        {
-            throw new FileStoreException($"不支持.");
-        }
-    }
-    class StoreDirInfo : IFileInfo
-    {
-        private string path;
-
-        public StoreDirInfo(string path)
-        {
-            this.path = path;
-        }
-
-        public bool Exists => true;
-
-        public long Length => -1;
-
-        public string PhysicalPath => path;
-
-        public string Name =>System.IO.Path.GetDirectoryName(path);
-
-        public DateTimeOffset LastModified => System.DateTimeOffset.Now;
-
-        public bool IsDirectory => true;
-
-        public Stream CreateReadStream()
-        {
-            return null;
+            public bool Exists => true;
+            public long Length => -1;
+            public string PhysicalPath => null;
+            public string Name { get; }
+            public DateTimeOffset LastModified { get; }
+            public bool IsDirectory => true;
+            public Stream CreateReadStream() => throw new NotSupportedException();
         }
     }
 }

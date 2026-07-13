@@ -1,124 +1,182 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using FileManager.FileStorage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FileManagerCore.Controllers
+namespace FileManager.Controllers
 {
-    //[Route("api/[controller]")]
     [Route("api/FileStorage/[controller]/[action]")]
     [ApiController]
     public class FileController : ControllerBase
     {
-        private readonly FileManager.FileStorage.IFileStore _fileStore;
-        public FileController(FileManager.FileStorage.IFileStore fileStore)
+        private const int MaxListFiles = 100;
+
+        private readonly IFileStore _fileStore;
+        private readonly FileStorePermissionGuard _guard;
+
+        public FileController(IFileStore fileStore, DefaultPermissionHandle permissions)
         {
             _fileStore = fileStore;
+            _guard = new FileStorePermissionGuard(fileStore, permissions ?? throw new ArgumentNullException(nameof(permissions)));
         }
+
         [HttpPost]
-        public async Task<ActionResult<bool>> UploadAsync(UploadFileInput model)
+        public async Task<ActionResult<bool>> UploadAsync([FromBody] UploadFileInput model, CancellationToken cancellationToken)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(model.Path))
-                    throw new ArgumentNullException(nameof(model.Path));
+                if (string.IsNullOrWhiteSpace(model?.Path))
+                    return BadRequest("Path is required.");
                 if (model.FileBytes == null || model.FileBytes.Length == 0)
-                    throw new ArgumentNullException(nameof(model.FileBytes));
-                var stream = new System.IO.MemoryStream(model.FileBytes);
+                    return BadRequest("FileBytes is required.");
 
-                await _fileStore.CreateFileFromStreamAsync(model.Path, stream);
+                model.Path = VirtualPath.Normalize(model.Path);
+                var parent = GetParentPath(model.Path);
+                await _guard.EnsureUploadAsync(parent, cancellationToken);
+                using (var stream = new MemoryStream(model.FileBytes))
+                {
+                    await _fileStore.CreateFileFromStreamAsync(model.Path, stream, cancellationToken: cancellationToken);
+                }
                 return true;
             }
-            catch (Exception)
+            catch (FileStoreException ex) when (ex.Message == "Access denied.")
             {
-                return BadRequest(ModelState);
+                return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
+            }
+            catch (FileStoreException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
-        [HttpPost]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<byte[]>> GetFileAsync(string path)
+
+        [HttpGet]
+        public async Task<IActionResult> DownloadAsync(string path, CancellationToken cancellationToken)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(path))
-                    throw new ArgumentNullException(nameof(path));
+                path = VirtualPath.Normalize(path);
+                await _guard.EnsureDownloadAsync(path, cancellationToken);
+                var stream = await _fileStore.GetFileStreamAsync(path, cancellationToken);
+                var fileName = Path.GetFileName(path);
+                return File(stream, "application/octet-stream", fileName);
+            }
+            catch (FileStoreException ex) when (ex.Message == "Access denied.")
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
+            }
+            catch (FileStoreException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-                using (var r = await _fileStore.GetFileStreamAsync(path))
+        [HttpPost]
+        public async Task<ActionResult<byte[]>> GetFileAsync(string path, CancellationToken cancellationToken)
+        {
+            try
+            {
+                path = VirtualPath.Normalize(path);
+                await _guard.EnsureDownloadAsync(path, cancellationToken);
+                using (var stream = await _fileStore.GetFileStreamAsync(path, cancellationToken))
+                using (var memoryStream = new MemoryStream())
                 {
-                    var stream = new System.IO.MemoryStream();
-                    await r.CopyToAsync(stream);
-                    return stream.ToArray();
+                    await stream.CopyToAsync(memoryStream);
+                    return memoryStream.ToArray();
                 }
             }
-            catch (Exception ex)
+            catch (FileStoreException ex) when (ex.Message == "Access denied.")
             {
-                return BadRequest(ex);
+                return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
+            }
+            catch (FileStoreException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
+
         [HttpPost]
-        public async Task<ActionResult<byte[][]>> GetListFilesAsync(string path, string extension)
+        public async Task<ActionResult<List<FileListItem>>> GetListFilesAsync(string path, string extension, CancellationToken cancellationToken)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(path))
-                    throw new ArgumentNullException(nameof(path));
+                path = VirtualPath.Normalize(path);
+                await _guard.EnsureListAsync(path, cancellationToken);
+                var directoryInfo = await _fileStore.GetDirectoryContentAsync(path, true, cancellationToken);
+                var items = new List<FileListItem>();
+                foreach (var file in directoryInfo.Where(f => !f.IsDirectory && string.Equals(Path.GetExtension(f.Path), extension, StringComparison.OrdinalIgnoreCase)).Take(MaxListFiles))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    items.Add(new FileListItem
+                    {
+                        Path = file.Path,
+                        Name = file.Name,
+                        Length = file.Length
+                    });
+                }
 
-                var DirectoryInfo = await _fileStore.GetDirectoryContentAsync(path, true);
-
-                if (DirectoryInfo == null)
-                    throw new ArgumentNullException(nameof(path));
-
-                var fileBytes = DirectoryInfo
-                    .Where(f => System.IO.Path.GetExtension(f.Path) == extension)
-                    .AsParallel()
-                    .Select(ff =>
-                   {
-                       using (var r = _fileStore.GetFileStreamAsync(ff.Path).Result)
-                       {
-                           var stream = new System.IO.MemoryStream();
-                           r.CopyToAsync(stream).Wait();
-                           return stream.ToArray();
-                       }
-                   }).ToArray();
-                return fileBytes;
+                return items;
             }
-            catch (Exception ex)
+            catch (FileStoreException ex) when (ex.Message == "Access denied.")
             {
-                return BadRequest(ex);
+                return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
+            }
+            catch (FileStoreException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
+
         [HttpDelete]
-        public async Task<ActionResult<bool>> DeleteFileAsync(string path)
+        public async Task<ActionResult<bool>> DeleteFileAsync(string path, CancellationToken cancellationToken)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(path))
-                    throw new ArgumentNullException(nameof(path));
-
-                return await _fileStore.TryDeleteFileAsync(path);
+                path = VirtualPath.Normalize(path);
+                await _guard.EnsureDeleteAsync(path, cancellationToken);
+                return await _fileStore.TryDeleteFileAsync(path, cancellationToken);
             }
-            catch (Exception ex)
+            catch (FileStoreException ex) when (ex.Message == "Access denied.")
             {
-                return BadRequest(ex);
+                return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
+            }
+            catch (FileStoreException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
+
         [HttpDelete]
-        public async Task<ActionResult<bool>> DeleteDirectoryAsync(string path)
+        public async Task<ActionResult<bool>> DeleteDirectoryAsync(string path, CancellationToken cancellationToken)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(path))
-                    throw new ArgumentNullException(nameof(path));
-
-                return await _fileStore.TryDeleteDirectoryAsync(path);
+                path = VirtualPath.Normalize(path);
+                await _guard.EnsureDeleteAsync(path, cancellationToken);
+                return await _fileStore.TryDeleteDirectoryAsync(path, cancellationToken);
             }
-            catch (Exception ex)
+            catch (FileStoreException ex) when (ex.Message == "Access denied.")
             {
-                return BadRequest(ex);
+                return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
+            }
+            catch (FileStoreException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
+
+        private static string GetParentPath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return string.Empty;
+            var slash = path.LastIndexOf('/');
+            return slash < 0 ? string.Empty : path.Substring(0, slash);
+        }
+
         public class UploadFileInput
         {
             public byte[] FileBytes { get; set; }

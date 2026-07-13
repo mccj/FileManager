@@ -3,40 +3,26 @@ using System;
 namespace FileManager.FileStorage
 {
     /// <summary>
-    /// Represents an abstract entry (file or directory) in a virtual file store.
+    /// 虚拟文件存储中的文件或目录项。
     /// </summary>
     public interface IFileStoreEntry
     {
-        /// <summary>
-        /// Gets the full path of the file store entry within the file store.
-        /// </summary>
+        /// <summary>在存储内的完整路径。</summary>
         string Path { get; }
 
-        /// <summary>
-        /// Gets the name of the file store entry.
-        /// </summary>
+        /// <summary>名称（不含路径）。</summary>
         string Name { get; }
 
-        /// <summary>
-        /// Gets the full path of the file store entry's containing directory within the file store.
-        /// </summary>
+        /// <summary>所在目录的路径。</summary>
         string DirectoryPath { get; }
 
-        /// <summary>
-        /// Gets the length of the file (0 if the file story entry is a directory).
-        /// </summary>
+        /// <summary>文件大小（字节）；目录时为 0。</summary>
         long Length { get; }
 
-        /// <summary>
-        /// Gets the date and time in UTC when the file store entry was last modified.
-        /// </summary>
+        /// <summary>最后修改时间（UTC）。</summary>
         DateTimeOffset LastModifiedUtc { get; }
 
-        /// <summary>
-        /// Gets a boolean indicating whether the file store entry is a directory.
-        /// </summary>
+        /// <summary>是否为目录。</summary>
         bool IsDirectory { get; }
-        //string Extension { get; }
-        //DateTime? CreationTimeUtc { get; }
     }
 }

@@ -1,0 +1,28 @@
+﻿@page "/"
+
+<PageTitle>Blazor · Minimal</PageTitle>
+
+<div class="text-center">
+    <h1 class="display-4">Blazor · Minimal</h1>
+    <p class="lead">演示如何在 Blazor Server 应用中集成 FileExplorer。</p>
+    <p>
+        <a class="btn btn-primary btn-lg" href="/Browser/">FileExplorer</a>
+        <a class="btn btn-outline-secondary btn-lg" href="/Default/">默认目录浏览</a>
+    </p>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h3>存储配置</h3>
+        <p>本示例使用 <code>AddContentRootFileProviderReadOnly()</code>，以<strong>只读</strong>方式暴露应用 ContentRoot。</p>
+    </div>
+    <div class="col-md-6">
+        <h3>宿主模型</h3>
+        <p>站点首页为 Blazor Server 组件；FileManager UI 通过中间件挂载在 <code>/Browser/</code>。</p>
+    </div>
+</div>
+
+<div class="alert alert-info mt-4">
+    <strong>提示：</strong>只读模式下写操作不可用。如需可读写存储与 REST API，请参考
+    <code>FileManager.Sample.Blazor.Full</code>。
+</div>

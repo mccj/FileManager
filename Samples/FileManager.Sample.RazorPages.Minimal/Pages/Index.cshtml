@@ -1,0 +1,34 @@
+@page
+@model FileManager.Sample.RazorPages.Minimal.Pages.IndexModel
+@{
+    ViewData["Title"] = "首页";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Razor Pages · Minimal</h1>
+    <p class="lead">演示如何用最少代码在 Razor Pages 应用中集成 FileExplorer。</p>
+    <p>
+        <a class="btn btn-primary btn-lg" href="/Browser/" role="button">FileExplorer</a>
+        <a class="btn btn-outline-secondary btn-lg" href="/Default/" role="button">默认目录浏览</a>
+    </p>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h3>存储配置</h3>
+        <p>本示例使用 <code>AddContentRootFileProviderReadOnly()</code>，以<strong>只读</strong>方式暴露应用 ContentRoot。</p>
+        <pre class="bg-light p-3 rounded border">builder.Services.AddFileManager(f => f
+    .AddContentRootFileProviderReadOnly());</pre>
+    </div>
+    <div class="col-md-6">
+        <h3>UI 配置</h3>
+        <p>FileExplorer 挂载在 <code>/Browser/</code>：</p>
+        <pre class="bg-light p-3 rounded border">app.UseFileManagerUI("/Browser", f => f
+    .UseFileExplorerUI());</pre>
+    </div>
+</div>
+
+<div class="alert alert-info mt-4" role="alert">
+    <strong>提示：</strong>只读模式下上传、删除、重命名等操作不可用。如需可读写存储与 REST API，请参考
+    <code>FileManager.Sample.RazorPages.Full</code> 或 <code>FileManager.Sample.Mvc.Full</code>。
+</div>

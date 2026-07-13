@@ -1,128 +1,56 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FileManager.FileStorage
 {
     /// <summary>
-    /// Represents a generic abstraction over a virtual file store.
+    /// 虚拟文件存储的通用抽象。
     /// </summary>
     /// <remarks>
-    /// The virtual file store uses forward slash (/) as the path delimiter, and has no concept of
-    /// volumes or drives. All paths are specified and returned as relative to the root of the virtual
-    /// file store. Absolute paths using a leading slash or leading period, and parent traversal
-    /// using "../", are not supported.
-    /// 
-    /// This abstraction does not dictate any case sensitivity semantics. Case sensitivity is left to
-    /// the underlying storage system of concrete implementations. For example, the Windows file system
-    /// is case insensitive, while Linux file system and Azure Blob Storage are case sensitive.
+    /// 路径使用正斜杠 (<c>/</c>) 分隔，相对于虚拟存储根目录；不支持绝对路径、盘符以及 <c>../</c> 上级遍历。
+    /// 大小写是否敏感由具体存储实现决定（例如 Windows 文件系统不区分大小写，Linux 与 Azure Blob 区分大小写）。
     /// </remarks>
     public interface IFileStore
     {
-        /// <summary>
-        /// Retrieves information about the given file within the file store.
-        /// </summary>
-        /// <param name="path">The path within the file store.</param>
-        /// <returns>A <see cref="IFileStoreEntry"/> object representing the file, or <c>null</c> if the file does not exist.</returns>
-        Task<IFileStoreEntry> GetFileInfoAsync(string path);
+        /// <summary>获取指定路径的文件信息。</summary>
+        Task<IFileStoreEntry> GetFileInfoAsync(string path, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Retrieves information about the given directory within the file store.
-        /// </summary>
-        /// <param name="path">The path within the file store.</param>
-        /// <returns>A <see cref="IFileStoreEntry"/> object representing the directory, or <c>null</c> if the directory does not exist.</returns>
-        Task<IFileStoreEntry> GetDirectoryInfoAsync(string path);
+        /// <summary>获取指定路径的目录信息。</summary>
+        Task<IFileStoreEntry> GetDirectoryInfoAsync(string path, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Enumerates the content (files and directories) in a given directory within the file store.
-        /// </summary>
-        /// <param name="path">The path of the directory to enumerate, or <c>null</c> to enumerate the root of the file store.</param>
-        /// <param name="includeSubDirectories">A flag to indicate whether to get the contents from just the top directory or from all sub-directories as well.</param>
-        /// <returns>The list of files and directories in the given directory.</returns>
-        /// <exception cref="FileStoreException">Thrown if the specified directory does not exist.</exception>
-        /// <remarks>
-        /// Results are grouped by entry type, where directories are followed by files.
-        /// </remarks>
-        Task<IEnumerable<IFileStoreEntry>> GetDirectoryContentAsync(string path = null, bool includeSubDirectories = false);
+        /// <summary>获取目录下的文件与子目录列表。</summary>
+        /// <param name="path">目录路径；为 <c>null</c> 时表示根目录。</param>
+        /// <param name="includeSubDirectories">是否递归包含子目录中的项。</param>
+        Task<IEnumerable<IFileStoreEntry>> GetDirectoryContentAsync(string path = null, bool includeSubDirectories = false, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Creates a directory in the file store if it doesn't already exist.
-        /// </summary>
-        /// <param name="path">The path of the directory to be created.</param>
-        /// <returns><c>true</c> if the directory was created; <c>false</c> if the directory already existed.</returns>
-        /// <exception cref="FileStoreException">Thrown if the specified path exists but is not a directory.</exception>
-        Task<bool> TryCreateDirectoryAsync(string path);
+        /// <summary>尝试创建目录；目录已存在时返回 <c>false</c>。</summary>
+        Task<bool> TryCreateDirectoryAsync(string path, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Deletes a file in the file store if it exists.
-        /// </summary>
-        /// <param name="path">The path of the file to be deleted.</param>
-        /// <returns><c>true</c> if the file was deleted; <c>false</c> if the file did not exist.</returns>
-        Task<bool> TryDeleteFileAsync(string path);
+        /// <summary>尝试删除文件。</summary>
+        Task<bool> TryDeleteFileAsync(string path, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Deletes a directory in the file store if it exists.
-        /// </summary>
-        /// <param name="path">The path of the directory to be deleted.</param>
-        /// <returns><c>true</c> if the directory was deleted; <c>false</c> if the directory did not exist.</returns>
-        Task<bool> TryDeleteDirectoryAsync(string path);
+        /// <summary>尝试删除目录。</summary>
+        Task<bool> TryDeleteDirectoryAsync(string path, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Renames or moves a file to another location in the file store.
-        /// </summary>
-        /// <param name="oldPath">The path of the file to be renamed/moved.</param>
-        /// <param name="newPath">The new path of the file after the rename/move.</param>
-        /// <exception cref="FileStoreException">Thrown if the specified file does not exist or if the <paramref name="newPath"/> path already exists.</exception>
-        Task MoveFileAsync(string oldPath, string newPath);
+        /// <summary>将文件移动到新路径。</summary>
+        Task MoveFileAsync(string oldPath, string newPath, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Creates a copy of a file in the file store.
-        /// </summary>
-        /// <param name="srcPath">The path of the source file to be copied.</param>
-        /// <param name="dstPath">The path of the destination file to be created.</param>
-        /// <exception cref="FileStoreException">Thrown if the specified file does not exist or if the <paramref name="dstPath"/> path already exists.</exception>
-        Task CopyFileAsync(string srcPath, string dstPath);
+        /// <summary>将文件复制到新路径。</summary>
+        Task CopyFileAsync(string srcPath, string dstPath, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Creates a stream to read the contents of a file in the file store.
-        /// </summary>
-        /// <param name="path">The path of the file to be read.</param>
-        /// <returns>An instance of <see cref="System.IO.Stream"/> that can be used to read the contents of the file. The caller must close the stream when finished.</returns>
-        /// <exception cref="FileStoreException">Thrown if the specified file does not exist.</exception>
-        Task<Stream> GetFileStreamAsync(string path);
+        /// <summary>按路径打开文件只读流。</summary>
+        Task<Stream> GetFileStreamAsync(string path, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Creates a stream to read the contents of a file in the file store.
-        /// </summary>
-        /// <param name="fileStoreEntry">The IFileStoreEntry to be read.</param>
-        /// <returns>An instance of <see cref="System.IO.Stream"/> that can be used to read the contents of the file. The caller must close the stream when finished.</returns>
-        /// <exception cref="FileStoreException">Thrown if the specified file does not exist.</exception>
-        Task<Stream> GetFileStreamAsync(IFileStoreEntry fileStoreEntry);
+        /// <summary>按文件项打开文件只读流。</summary>
+        Task<Stream> GetFileStreamAsync(IFileStoreEntry fileStoreEntry, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Creates a new file in the file store from the contents of an input stream.
-        /// </summary>
-        /// <param name="path">The path of the file to be created.</param>
-        /// <param name="inputStream">The stream whose contents to write to the new file.</param>
-        /// <param name="overwrite"><c>true</c> to overwrite if a file already exists; <c>false</c> to throw an exception if the file already exists.</param>
-        /// <exception cref="FileStoreException">Thrown if the specified file already exists and <paramref name="overwrite"/> was not set to <c>true</c>, or if the specified path exists but is not a file.</exception>
-        /// <remarks>
-        /// If the specified path contains one or more directories, then those directories are
-        /// created if they do not already exist.
-        /// </remarks>
-        Task CreateFileFromStreamAsync(string path, Stream inputStream, bool overwrite = false);
+        /// <summary>从输入流创建或覆盖文件。</summary>
+        Task CreateFileFromStreamAsync(string path, Stream inputStream, bool overwrite = false, CancellationToken cancellationToken = default);
 
-
-        Task MoveDirectoryAsync(string oldPath, string newPath);
-        
-
-        //Task CreateFileFromStream(string path, Stream inputStream, bool overwrite = false);
-        //bool DirectoryExists(string newPath);
-        //bool FileExists(string newPath);
-        //void CopyDirectoryAsync(string oldPath, string newPath);
-        //Task<bool> IsDirectory(string path);
-        //Task<IFileStoreEntry> GetDirectoryInfoAsync(string path);
+        /// <summary>将目录移动到新路径。</summary>
+        Task MoveDirectoryAsync(string oldPath, string newPath, CancellationToken cancellationToken = default);
     }
 }

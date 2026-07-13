@@ -1,4 +1,4 @@
-/*
+﻿/*
  * jQuery File Upload Plugin Angular JS Example
  * https://github.com/blueimp/jQuery-File-Upload
  *

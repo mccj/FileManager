@@ -87,7 +87,7 @@ await client.DeleteFileAsync("test.txt");
 
 SDK 方法由 `FileClientGeneration.cs` 和 `FileClientModelsGeneration.cs` 生成。
 
-测试项目：`Test/FileManagerSdkTest/`
+测试项目：`Test/FileManager.UI.WebApi.Sdk.Test/`
 
 ## FileExplorer 内部 API
 

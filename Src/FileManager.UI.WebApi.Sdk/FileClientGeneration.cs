@@ -34,11 +34,11 @@ namespace FileManagerSdk
         System.Threading.Tasks.Task<byte[]> File_GetFileAsync(string path = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
     
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Collections.Generic.ICollection<byte[]> File_GetListFiles(string path = null, string extension = null);
+        System.Collections.Generic.ICollection<FileManagerSdk.Models.FileListItem> File_GetListFiles(string path = null, string extension = null);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<byte[]>> File_GetListFilesAsync(string path = null, string extension = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FileManagerSdk.Models.FileListItem>> File_GetListFilesAsync(string path = null, string extension = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
     
         /// <exception cref="ApiException">A server side error occurred.</exception>
         bool File_DeleteFile(string path = null);
@@ -227,14 +227,14 @@ namespace FileManagerSdk
         }
     
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public System.Collections.Generic.ICollection<byte[]> File_GetListFiles(string path = null, string extension = null)
+        public System.Collections.Generic.ICollection<FileManagerSdk.Models.FileListItem> File_GetListFiles(string path = null, string extension = null)
         {
             return System.Threading.Tasks.Task.Run(async () => await File_GetListFilesAsync(path, extension, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<byte[]>> File_GetListFilesAsync(string path = null, string extension = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FileManagerSdk.Models.FileListItem>> File_GetListFilesAsync(string path = null, string extension = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/FileStorage/File/GetListFilesAsync?");
@@ -277,7 +277,7 @@ namespace FileManagerSdk
                         var status_ = ((int)response_.StatusCode).ToString();
                         if (status_ == "200") 
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.ICollection<byte[]>>(response_, headers_).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.ICollection<FileManagerSdk.Models.FileListItem>>(response_, headers_).ConfigureAwait(false);
                             return objectResponse_.Object;
                         }
                         else
@@ -287,7 +287,7 @@ namespace FileManagerSdk
                             throw new ApiException("The HTTP status code of the response was not expected (" + (int)response_.StatusCode + ").", (int)response_.StatusCode, responseData_, headers_, null);
                         }
             
-                        return default(System.Collections.Generic.ICollection<byte[]>);
+                        return default(System.Collections.Generic.ICollection<FileManagerSdk.Models.FileListItem>);
                     }
                     finally
                     {

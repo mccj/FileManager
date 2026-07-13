@@ -1,0 +1,65 @@
+body {
+  font-family: Segoe UI, system-ui, sans-serif;
+  margin: 0;
+  background: #f5f7fb;
+  color: #1f2937;
+}
+
+header, .toolbar, main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.4rem;
+}
+
+#breadcrumb {
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+button, .upload {
+  border: 1px solid #cbd5e1;
+  background: white;
+  border-radius: 6px;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+}
+
+.upload {
+  display: inline-flex;
+  align-items: center;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+th, td {
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.name {
+  cursor: pointer;
+  color: #2563eb;
+}
+
+.actions button {
+  margin-right: 0.25rem;
+}

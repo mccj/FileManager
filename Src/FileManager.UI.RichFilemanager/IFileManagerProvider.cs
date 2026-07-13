@@ -1,30 +1,29 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 #if !NETFULL
-//using Microsoft.AspNetCore.StaticFiles;
-#else
+using Microsoft.AspNetCore.Http;
 #endif
+
 namespace FileManager
 {
     public interface IFileManagerProvider
     {
-        Result<ResultInfo> Initiate();
-        Result<ResultInfo[]> SeekFolder(string path, string search);
-        Result<ResultInfo> GetInfo(string path);
-        Result<ResultInfo[]> ReadFolder(string path);
-        Result<ResultInfo> AddFolder(string path, string name);
+        Task<Result<ResultInfo>> InitiateAsync(CancellationToken cancellationToken = default);
+        Task<Result<ResultInfo[]>> SeekFolderAsync(string path, string search, CancellationToken cancellationToken = default);
+        Task<Result<ResultInfo>> GetInfoAsync(string path, CancellationToken cancellationToken = default);
+        Task<Result<ResultInfo[]>> ReadFolderAsync(string path, CancellationToken cancellationToken = default);
+        Task<Result<ResultInfo>> AddFolderAsync(string path, string name, CancellationToken cancellationToken = default);
 #if !NETFULL
-        Task<Result<List<ResultInfo>>> Upload(string path, IEnumerable<Microsoft.AspNetCore.Http.IFormFile> files);
-#else
-        //Task<Result<List<ResultInfo>>> Upload(string path, IEnumerable<IFormFile> files);
+        Task<Result<List<ResultInfo>>> UploadAsync(string path, IEnumerable<IFormFile> files, CancellationToken cancellationToken = default);
 #endif
-        Result<ResultInfo> Rename(string old, string @new);
-        Result<ResultInfo> Move(string old, string @new);
-        Result<ResultInfo> Copy(string source, string target);
-        Result<ResultInfo> SaveFile(string path, string content);
-        Result<ResultInfo> Delete(string path);
-        byte[] ReadFile(string path);
-        byte[] GetImage(string path, bool thumbnail);
-        Result<ResultInfo> Summarize();
+        Task<Result<ResultInfo>> RenameAsync(string old, string @new, CancellationToken cancellationToken = default);
+        Task<Result<ResultInfo>> MoveAsync(string old, string @new, CancellationToken cancellationToken = default);
+        Task<Result<ResultInfo>> CopyAsync(string source, string target, CancellationToken cancellationToken = default);
+        Task<Result<ResultInfo>> SaveFileAsync(string path, string content, CancellationToken cancellationToken = default);
+        Task<Result<ResultInfo>> DeleteAsync(string path, CancellationToken cancellationToken = default);
+        Task<Stream> OpenReadAsync(string path, CancellationToken cancellationToken = default);
+        Task<Result<ResultInfo>> SummarizeAsync(CancellationToken cancellationToken = default);
     }
 }

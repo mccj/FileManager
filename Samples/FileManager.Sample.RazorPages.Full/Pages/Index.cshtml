@@ -1,0 +1,13 @@
+@page
+@model FileManager.Sample.RazorPages.Full.Pages.IndexModel
+@{
+    ViewData["Title"] = "Razor Pages · Full";
+}
+
+@await Component.InvokeAsync("SampleHub", new
+{
+    hostTitle = "Razor Pages · Full",
+    storageProvider = Model.StorageProvider,
+    readOnly = Model.IsReadOnly,
+    mountMode = Model.MountMode
+})

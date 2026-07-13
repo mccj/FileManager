@@ -1,0 +1,12 @@
+﻿body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; background: #f8fafc; color: #0f172a; }
+header { padding: 1rem 1.5rem; background: #059669; color: #fff; }
+header h1 { margin: 0 0 .5rem; font-size: 1.25rem; }
+.breadcrumb a { color: #fff; opacity: .9; text-decoration: none; }
+.toolbar { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem; background: #e2e8f0; align-items: center; }
+.toolbar button, .toolbar .upload, .toolbar select { padding: .4rem .75rem; border: 1px solid #94a3b8; background: #fff; border-radius: 4px; cursor: pointer; }
+main { padding: 1rem 1.5rem; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { padding: .6rem .75rem; border-bottom: 1px solid #e2e8f0; text-align: left; }
+td a { color: #2563eb; text-decoration: none; }
+.editor-wrap { padding: 1rem 1.5rem; }
+

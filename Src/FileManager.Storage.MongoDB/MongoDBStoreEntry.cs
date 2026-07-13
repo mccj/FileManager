@@ -17,7 +17,7 @@ namespace FileManager.Storage.MongoDB
         }
 
         public string Path => _path;
-        public string Name =>System.IO.Path.GetFileName( _fileInfo.Filename?.Replace('\\', '/')?.Trim('/'));//?? Uri.UnescapeDataString(System.IO.Path.GetFileName(_fileInfo.Uri?.Trim('/', '\\')));
+        public string Name => System.IO.Path.GetFileName(_fileInfo.Filename?.Replace('\\', '/')?.Trim('/')); // 从 GridFS 路径提取文件名
         public string DirectoryPath => _path.Substring(0, _path.Length - Name.Length).TrimEnd('/');
         public long Length => _fileInfo.Length;
         public bool IsDirectory => _fileInfo.Length <= -1;

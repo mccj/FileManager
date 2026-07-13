@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>FileManager.Sample.Blazor.Minimal</RootNamespace>
+    <AssemblyName>FileManager.Sample.Blazor.Minimal</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FileManager.Samples.Test" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Src\FileManager.UI.Explorer\FileManager.UI.Explorer.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI\FileManager.UI.csproj" />
+  </ItemGroup>
+
+</Project>

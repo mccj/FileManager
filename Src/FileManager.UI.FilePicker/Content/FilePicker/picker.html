@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>File Picker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="picker.css">
+</head>
+<body>
+  <header>
+    <h1>File Picker</h1>
+    <p>Select one or more files, then click <strong>Select</strong> to return them to the opener.</p>
+    <div id="breadcrumb"></div>
+  </header>
+  <section class="toolbar">
+    <button id="btn-up" type="button">Up</button>
+    <button id="btn-refresh" type="button">Refresh</button>
+    <button id="btn-select" type="button" class="primary" disabled>Select</button>
+    <button id="btn-cancel" type="button">Cancel</button>
+  </section>
+  <main>
+    <table>
+      <thead><tr><th></th><th>Name</th><th>Size</th></tr></thead>
+      <tbody id="entries"></tbody>
+    </table>
+  </main>
+  <script src="picker.js"></script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+@using FileManager.Sample.Shared
+@namespace FileManager.Sample.Blazor.Full.Components
+
+<div class="text-center mb-4">
+    <h1 class="display-5">@HostTitle</h1>
+    <p class="lead">
+        @(IncludeExtendedUis ? "二十五种" : "六种核心") UI 同时挂载，共享当前存储后端；并包含 REST API 与健康检查。
+    </p>
+    <p>
+        当前存储：<span class="badge bg-primary">@StorageProvider</span>
+        @if (ReadOnly)
+        {
+            <span class="badge bg-secondary">只读</span>
+        }
+        else
+        {
+            <span class="badge bg-success">可读写</span>
+        }
+        <span class="badge bg-info text-dark">MountMode: @MountMode</span>
+    </p>
+</div>
+
+<div class="alert alert-warning">
+    <strong>安全提示：</strong>本示例默认可写存储且使用 <code>AddFullAccessPermissionHandle()</code>，<strong>仅供本地演示</strong>。
+</div>
+
+@if (ShowApiCards)
+{
+    <h2 class="h4 mb-3">API 与运维</h2>
+    <div class="row g-3 mb-4">
+        @foreach (var card in ApiCards)
+        {
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@card.Title</h5>
+                        <p class="card-text">@card.Description</p>
+                        <a class="btn @card.ButtonClass" href="@card.Path" target="_blank">打开 @card.Path</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<h2 class="h4 mb-3">UI 前端</h2>
+<div class="row g-3 mb-5">
+    @foreach (var card in UiCards)
+    {
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        @card.Title
+                        @if (card.Recommended)
+                        {
+                            <span class="badge bg-success">推荐</span>
+                        }
+                    </h5>
+                    <p class="card-text">@card.Description</p>
+                    <code>@card.MethodName</code>
+                    <div class="mt-3">
+                        <a class="btn @(card.Recommended ? "btn-primary" : "btn-outline-primary")" href="@card.Path">打开 @card.Path</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<h2 class="h4 mb-3">存储后端</h2>
+<p>在 <code>appsettings.json</code> 中设置 <code>FileManager:Storage:Provider</code>，或使用 launch profile。</p>
+<div class="table-responsive mb-4">
+    <table class="table table-sm table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Provider</th>
+                <th>说明</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var provider in StorageProviders)
+            {
+                <tr class="@(string.Equals(provider, StorageProvider, StringComparison.OrdinalIgnoreCase) ? "table-primary" : null)">
+                    <td><code>@provider</code></td>
+                    <td>@(string.Equals(provider, StorageProvider, StringComparison.OrdinalIgnoreCase) ? "当前已启用" : "可切换")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter] public string HostTitle { get; set; } = "Full";
+    [Parameter] public string StorageProvider { get; set; } = "Physical";
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public string MountMode { get; set; } = "Lite";
+    [Parameter] public bool ShowApiCards { get; set; } = true;
+
+    private bool IncludeExtendedUis => string.Equals(MountMode, "Full", StringComparison.OrdinalIgnoreCase);
+    private IReadOnlyList<SampleHubUiCard> UiCards => SampleHubCatalog.GetUiCards(IncludeExtendedUis);
+    private IReadOnlyList<SampleHubApiCard> ApiCards => ShowApiCards ? SampleHubCatalog.GetApiCards() : Array.Empty<SampleHubApiCard>();
+    private IReadOnlyList<string> StorageProviders => SampleHubCatalog.GetStorageProviders();
+}

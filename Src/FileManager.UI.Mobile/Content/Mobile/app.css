@@ -1,0 +1,19 @@
+﻿body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; background: #f8fafc; color: #0f172a; }
+header { padding: 1rem 1.5rem; background: #10b981; color: #fff; }
+header h1 { margin: 0 0 .5rem; font-size: 1.25rem; }
+.breadcrumb a { color: #fff; opacity: .9; text-decoration: none; }
+.toolbar { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem; background: #e2e8f0; }
+.toolbar button, .toolbar .upload { padding: .4rem .75rem; border: 1px solid #94a3b8; background: #fff; border-radius: 4px; cursor: pointer; }
+main { padding: 1rem 1.5rem; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { padding: .6rem .75rem; border-bottom: 1px solid #e2e8f0; text-align: left; }
+td a { color: #2563eb; text-decoration: none; }
+.dropzone { margin: 1rem 1.5rem; padding: 2rem; border: 2px dashed #94a3b8; border-radius: 8px; text-align: center; background: #fff; }
+.dropzone.hover { border-color: #10b981; background: #eff6ff; }
+body.media-grid main table { display: none; }
+body.media-grid main::after { content: 'Image/video grid uses list below — click folders to browse media.'; display: block; color: #64748b; margin-bottom: 1rem; }
+@media (max-width: 640px) {
+  .toolbar button, .toolbar .upload { flex: 1 1 45%; }
+  table { font-size: .9rem; }
+  th:nth-child(3), td:nth-child(3) { display: none; }
+}

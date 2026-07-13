@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>FileManager.Sample.Shared</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Src\FileManager.Storage.AwsS3\FileManager.Storage.AwsS3.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.AzureBlob\FileManager.Storage.AzureBlob.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Box\FileManager.Storage.Box.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Cassandra\FileManager.Storage.Cassandra.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Composite\FileManager.Storage.Composite.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Compress\FileManager.Storage.Compress.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Dropbox\FileManager.Storage.Dropbox.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Elasticsearch\FileManager.Storage.Elasticsearch.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Ftp\FileManager.Storage.Ftp.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.GoogleCloud\FileManager.Storage.GoogleCloud.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.GoogleDrive\FileManager.Storage.GoogleDrive.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.InMemory\FileManager.Storage.InMemory.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Ldap\FileManager.Storage.Ldap.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.MongoDB\FileManager.Storage.MongoDB.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.MySqlBlob\FileManager.Storage.MySqlBlob.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Nfs\FileManager.Storage.Nfs.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.OneDrive\FileManager.Storage.OneDrive.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.PostgreSqlBlob\FileManager.Storage.PostgreSqlBlob.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Redis\FileManager.Storage.Redis.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.SharePoint\FileManager.Storage.SharePoint.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.InfluxDb\FileManager.Storage.InfluxDb.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Kafka\FileManager.Storage.Kafka.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Memcached\FileManager.Storage.Memcached.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.RabbitMq\FileManager.Storage.RabbitMq.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Sftp\FileManager.Storage.Sftp.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Smb\FileManager.Storage.Smb.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.SqlBlob\FileManager.Storage.SqlBlob.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.SqlServerBlob\FileManager.Storage.SqlServerBlob.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.Standard\FileManager.Storage.Standard.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Storage.WebDav\FileManager.Storage.WebDav.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.AdminLTE\FileManager.UI.AdminLTE.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.CkEditor\FileManager.UI.CkEditor.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.ElFinder\FileManager.UI.ElFinder.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.Explorer\FileManager.UI.Explorer.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.FilePicker\FileManager.UI.FilePicker.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.Pwa\FileManager.UI.Pwa.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.RestShell\FileManager.UI.RestShell.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.RichFilemanager\FileManager.UI.RichFilemanager.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.TinyMce\FileManager.UI.TinyMce.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI\FileManager.UI.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.Core\FileManager.Core.csproj" />
+  </ItemGroup>
+
+</Project>
+
+

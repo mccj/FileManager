@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FileManager
 {
     /// <summary>
-    /// 
+    /// 本地文件系统目录存储注册扩展。
     /// </summary>
     public  static partial class ApplicationBuilderExtensions
     {
@@ -15,6 +15,7 @@ namespace FileManager
                 return new FileStorage.Standard.FileSystemStore(func(sp));
             });
         }
+        /// <summary>注册物理路径为存储根（可读写）。</summary>
         public static FileServicesOptions AddRootPhysicalFilePath(this FileServicesOptions app, Microsoft.AspNetCore.Http.PathString path)
         {
             return AddPhysicalFilePath(app, sp =>

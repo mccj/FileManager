@@ -2,17 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FileManager.FileStorage
 {
     public static class IFileStoreExtensions
     {
-        /// <summary>
-        /// Combines multiple path parts using the path delimiter semantics of the abstract virtual file store. 
-        /// </summary>
-        /// <param name="paths">The path parts to combine.</param>
-        /// <returns>The full combined path.</returns>
         public static string Combine(this IFileStore fileStore, params string[] paths)
         {
             if (paths.Length == 0)
@@ -25,27 +21,31 @@ namespace FileManager.FileStorage
                     .ToArray();
 
             var combined = String.Join("/", normalizedParts);
-
-            // Preserve the initial '/' if it's present.
-            if (paths[0]?.StartsWith("/") == true)
-                combined = "/" + combined;
-
             return combined;
         }
 
-        /// <summary>
-        /// Normalizes a path using the path delimiter semantics of the abstract virtual file store.
-        /// </summary>
-        /// <remarks>
-        /// Backslash is converted to forward slash and any leading or trailing slashes
-        /// are removed.
-        /// </remarks>
         public static string NormalizePath(this IFileStore fileStore, string path)
         {
-            if (path == null)
-                return null;
+            return VirtualPath.Normalize(path);
+        }
 
-            return path.Replace('\\', '/').Trim('/');
+        public static async Task CopyDirectoryAsync(this IFileStore fileStore, string sourcePath, string targetPath, CancellationToken cancellationToken = default)
+        {
+            sourcePath = fileStore.NormalizePath(sourcePath);
+            targetPath = fileStore.NormalizePath(targetPath);
+
+            await fileStore.TryCreateDirectoryAsync(targetPath, cancellationToken);
+            var entries = await fileStore.GetDirectoryContentAsync(sourcePath, includeSubDirectories: false, cancellationToken);
+            foreach (var entry in entries)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var sourceItemPath = fileStore.Combine(sourcePath, entry.Name);
+                var targetItemPath = fileStore.Combine(targetPath, entry.Name);
+                if (entry.IsDirectory)
+                    await CopyDirectoryAsync(fileStore, sourceItemPath, targetItemPath, cancellationToken);
+                else
+                    await fileStore.CopyFileAsync(sourceItemPath, targetItemPath, cancellationToken);
+            }
         }
     }
 }

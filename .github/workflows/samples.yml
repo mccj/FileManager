@@ -1,0 +1,80 @@
+name: samples
+
+
+
+on:
+
+  push:
+
+    paths:
+
+      - 'Samples/**'
+
+      - 'Src/**'
+
+      - 'Test/FileManager.Samples.Test/**'
+
+      - '.github/workflows/samples.yml'
+
+  pull_request:
+
+    paths:
+
+      - 'Samples/**'
+
+      - 'Src/**'
+
+      - 'Test/FileManager.Samples.Test/**'
+
+      - '.github/workflows/samples.yml'
+
+
+
+jobs:
+
+  build-and-test:
+
+    runs-on: windows-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+
+
+      - name: Setup .NET
+
+        uses: actions/setup-dotnet@v4
+
+        with:
+
+          dotnet-version: '10.0.x'
+
+
+
+      - name: Build host-model samples
+
+        run: |
+
+          dotnet build Samples/FileManager.Sample.Shared/FileManager.Sample.Shared.csproj --configuration Release
+
+          dotnet build Samples/FileManager.Sample.RazorPages.Minimal/FileManager.Sample.RazorPages.Minimal.csproj --configuration Release
+
+          dotnet build Samples/FileManager.Sample.RazorPages.Full/FileManager.Sample.RazorPages.Full.csproj --configuration Release
+
+          dotnet build Samples/FileManager.Sample.Mvc.Minimal/FileManager.Sample.Mvc.Minimal.csproj --configuration Release
+
+          dotnet build Samples/FileManager.Sample.Mvc.Full/FileManager.Sample.Mvc.Full.csproj --configuration Release
+
+          dotnet build Samples/FileManager.Sample.Blazor.Minimal/FileManager.Sample.Blazor.Minimal.csproj --configuration Release
+
+          dotnet build Samples/FileManager.Sample.Blazor.Full/FileManager.Sample.Blazor.Full.csproj --configuration Release
+
+          dotnet build Samples/FileManager.Sample.Owin/FileManager.Sample.Owin.csproj --configuration Release
+
+
+
+      - name: Run sample smoke tests
+
+        run: dotnet test Test/FileManager.Samples.Test/FileManager.Samples.Test.csproj --configuration Release
+

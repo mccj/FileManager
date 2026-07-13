@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mobile File Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="app.css">
+  
+</head>
+<body>
+  <header><h1>Mobile File Manager</h1><nav id="breadcrumb" class="breadcrumb"></nav></header>
+  <section class="toolbar">
+    <button type="button" id="btn-up">Up</button>
+    <button type="button" id="btn-mkdir">New Folder</button>
+    <label class="upload">Upload<input id="file-input" type="file" multiple hidden></label>
+    <button type="button" id="btn-refresh">Refresh</button>
+  </section>
+  
+  <main>
+    <table id="file-table">
+      <thead><tr><th>Name</th><th>Size</th><th>Modified (UTC)</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

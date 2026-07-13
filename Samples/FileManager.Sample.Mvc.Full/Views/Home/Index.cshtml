@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "MVC · Full";
+}
+
+@await Component.InvokeAsync("SampleHub", new
+{
+    hostTitle = "MVC · Full",
+    storageProvider = ViewBag.StorageProvider,
+    readOnly = ViewBag.IsReadOnly,
+    mountMode = ViewBag.ShowcaseMountMode
+})
+
+@if (ViewBag.RequireAuth == true)
+{
+    <div class="mt-3">
+        <form asp-action="Logout" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-danger btn-sm">退出演示登录</button>
+        </form>
+    </div>
+}

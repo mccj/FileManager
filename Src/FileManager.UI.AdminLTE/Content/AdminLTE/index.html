@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AdminLTE File Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="hold-transition sidebar-mini">
+  <div class="wrapper">
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom">
+      <ul class="navbar-nav">
+        <li class="nav-item"><span class="nav-link font-weight-bold">AdminLTE File Manager</span></li>
+      </ul>
+      <ul class="navbar-nav ml-auto" id="breadcrumb"></ul>
+    </nav>
+    <div class="content-wrapper p-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="btn-group">
+            <button id="btn-up" class="btn btn-sm btn-default" type="button"><i class="fas fa-level-up-alt"></i> Up</button>
+            <button id="btn-mkdir" class="btn btn-sm btn-primary" type="button"><i class="fas fa-folder-plus"></i> New Folder</button>
+            <label class="btn btn-sm btn-success mb-0">Upload<input id="file-input" type="file" multiple hidden></label>
+            <button id="btn-refresh" class="btn btn-sm btn-default" type="button"><i class="fas fa-sync"></i> Refresh</button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Name</th><th>Size</th><th>Modified (UTC)</th><th></th></tr></thead>
+            <tbody id="entries"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

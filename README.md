@@ -1,4 +1,4 @@
-﻿FileManagerWebUI
+FileManager
 ========================================
 [![Build status](https://ci.appveyor.com/api/projects/status/6g5itdvi149m0s63?svg=true)](https://ci.appveyor.com/project/mccj/filemanager)
 
@@ -15,7 +15,7 @@ Packages
 | [FileManager.Storage.MongoDB](https://www.nuget.org/packages/FileManager.Storage.MongoDB/) | [![FileManager.Storage.MongoDB](https://img.shields.io/nuget/v/FileManager.Storage.MongoDB.svg)](https://www.nuget.org/packages/FileManager.Storage.MongoDB/) | [![FileManager.Storage.MongoDB](https://img.shields.io/nuget/vpre/FileManager.Storage.MongoDB.svg)](https://www.nuget.org/packages/FileManager.Storage.MongoDB/) | [![FileManager.Storage.MongoDB](https://img.shields.io/nuget/dt/FileManager.Storage.MongoDB.svg)](https://www.nuget.org/packages/FileManager.Storage.MongoDB/) | [![FileManager.Storage.MongoDB MyGet](https://img.shields.io/myget/mccj/vpre/FileManager.Storage.MongoDB.svg)](https://www.myget.org/feed/mccj/package/nuget/FileManager.Storage.MongoDB) |
 | [FileManager.UI](https://www.nuget.org/packages/FileManager.UI/) | [![FileManager.UI](https://img.shields.io/nuget/v/FileManager.UI.svg)](https://www.nuget.org/packages/FileManager.UI/) | [![FileManager.UI](https://img.shields.io/nuget/vpre/FileManager.UI.svg)](https://www.nuget.org/packages/FileManager.UI/) | [![FileManager.UI](https://img.shields.io/nuget/dt/FileManager.UI.svg)](https://www.nuget.org/packages/FileManager.UI/) | [![FileManager.UI MyGet](https://img.shields.io/myget/mccj/vpre/FileManager.UI.svg)](https://www.myget.org/feed/mccj/package/nuget/FileManager.UI) |
 | [FileManager.UI.Explorer](https://www.nuget.org/packages/FileManager.UI.Explorer/) | [![FileManager.UI.Explorer](https://img.shields.io/nuget/v/FileManager.UI.Explorer.svg)](https://www.nuget.org/packages/FileManager.UI.Explorer/) | [![FileManager.UI.Explorer](https://img.shields.io/nuget/vpre/FileManager.UI.Explorer.svg)](https://www.nuget.org/packages/FileManager.UI.Explorer/) | [![FileManager.UI.Explorer](https://img.shields.io/nuget/dt/FileManager.UI.Explorer.svg)](https://www.nuget.org/packages/FileManager.UI.Explorer/) | [![FileManager.UI.Explorer MyGet](https://img.shields.io/myget/mccj/vpre/FileManager.UI.Explorer.svg)](https://www.myget.org/feed/mccj/package/nuget/FileManager.UI.Explorer) |
-| ~~*[FileManager.UI.RichFilemanager](https://www.nuget.org/packages/FileManager.UI.RichFilemanager/)*~~ | [![FileManager.UI.RichFilemanager](https://img.shields.io/nuget/v/FileManager.UI.RichFilemanager.svg)](https://www.nuget.org/packages/FileManager.UI.RichFilemanager/) | [![FileManager.UI.RichFilemanager](https://img.shields.io/nuget/vpre/FileManager.UI.RichFilemanager.svg)](https://www.nuget.org/packages/FileManager.UI.RichFilemanager/) | [![FileManager.UI.RichFilemanager](https://img.shields.io/nuget/dt/FileManager.UI.RichFilemanager.svg)](https://www.nuget.org/packages/FileManager.UI.RichFilemanager/) | [![FileManager.UI.RichFilemanager MyGet](https://img.shields.io/myget/mccj/vpre/FileManager.UI.RichFilemanager.svg)](https://www.myget.org/feed/mccj/package/nuget/FileManager.UI.RichFilemanager) |
+| [FileManager.UI.RichFilemanager](https://www.nuget.org/packages/FileManager.UI.RichFilemanager/) | [![FileManager.UI.RichFilemanager](https://img.shields.io/nuget/v/FileManager.UI.RichFilemanager.svg)](https://www.nuget.org/packages/FileManager.UI.RichFilemanager/) | [![FileManager.UI.RichFilemanager](https://img.shields.io/nuget/vpre/FileManager.UI.RichFilemanager.svg)](https://www.nuget.org/packages/FileManager.UI.RichFilemanager/) | [![FileManager.UI.RichFilemanager](https://img.shields.io/nuget/dt/FileManager.UI.RichFilemanager.svg)](https://www.nuget.org/packages/FileManager.UI.RichFilemanager/) | [![FileManager.UI.RichFilemanager MyGet](https://img.shields.io/myget/mccj/vpre/FileManager.UI.RichFilemanager.svg)](https://www.myget.org/feed/mccj/package/nuget/FileManager.UI.RichFilemanager) |
 | [FileManager.UI.WebApi](https://www.nuget.org/packages/FileManager.UI.WebApi/) | [![FileManager.UI.WebApi](https://img.shields.io/nuget/v/FileManager.UI.WebApi.svg)](https://www.nuget.org/packages/FileManager.UI.WebApi/) | [![FileManager.UI.WebApi](https://img.shields.io/nuget/vpre/FileManager.UI.WebApi.svg)](https://www.nuget.org/packages/FileManager.UI.WebApi/) | [![FileManager.UI.WebApi](https://img.shields.io/nuget/dt/FileManager.UI.WebApi.svg)](https://www.nuget.org/packages/FileManager.UI.WebApi/) | [![FileManager.UI.WebApi MyGet](https://img.shields.io/myget/mccj/vpre/FileManager.UI.WebApi.svg)](https://www.myget.org/feed/mccj/package/nuget/FileManager.UI.WebApi) |
 | [FileManager.UI.WebApi.Sdk](https://www.nuget.org/packages/FileManager.UI.WebApi.Sdk/) | [![FileManager.UI.WebApi.Sdk](https://img.shields.io/nuget/v/FileManager.UI.WebApi.Sdk.svg)](https://www.nuget.org/packages/FileManager.UI.WebApi.Sdk/) | [![FileManager.UI.WebApi.Sdk](https://img.shields.io/nuget/vpre/FileManager.UI.WebApi.Sdk.svg)](https://www.nuget.org/packages/FileManager.UI.WebApi.Sdk/) | [![FileManager.UI.WebApi.Sdk](https://img.shields.io/nuget/dt/FileManager.UI.WebApi.Sdk.svg)](https://www.nuget.org/packages/FileManager.UI.WebApi.Sdk/) | [![FileManager.UI.WebApi.Sdk MyGet](https://img.shields.io/myget/mccj/vpre/FileManager.UI.WebApi.Sdk.svg)](https://www.myget.org/feed/mccj/package/nuget/FileManager.UI.WebApi.Sdk) |
 
@@ -24,8 +24,8 @@ Features
 
 在线文件管理系统，为 ASP.NET Core 应用提供可插拔的文件存储后端与富 UI 前端。
 
-- **多存储后端** — 本地文件系统、FTP、WebDAV、ZIP 压缩包、MongoDB GridFS
-- **多种 UI** — FileExplorer 富管理界面、默认目录浏览、REST API
+- **多存储后端** — 本地、FTP、WebDAV、ZIP、MongoDB、Azure Blob、AWS S3、SFTP、GCS、Redis、SQL BLOB、MinIO 等
+- **多种 UI** — FileExplorer、Rich Filemanager、elFinder、SPA、Vue、AdminLTE、FilePicker、默认目录浏览、REST API
 - **权限控制** — 基于标志位的细粒度文件/文件夹操作权限
 - **NuGet 分发** — 模块化设计，按需引用
 
@@ -51,6 +51,16 @@ services.AddFileManager(f => f
 app.UseFileManagerUI("/Browser", f => f.UseFileExplorerUI());
 ```
 
+## 运行示例
+
+```bash
+dotnet run --project Samples/FileManager.Sample.Mvc.Full/FileManager.Sample.Mvc.Full.csproj   # MVC 完整功能
+dotnet run --project Samples/FileManager.Sample.RazorPages.Minimal/FileManager.Sample.RazorPages.Minimal.csproj   # Razor Pages 最小入门
+dotnet run --project Samples/FileManager.Sample.Blazor.Full/FileManager.Sample.Blazor.Full.csproj   # Blazor 多 UI + 存储
+```
+
+详见 [Samples/README.md](Samples/README.md)（含 Razor Pages / MVC / Blazor × Minimal/Full 矩阵）。
+
 ## 项目结构
 
 ```
@@ -61,11 +71,15 @@ Src/
 ├── FileManager.UI.Explorer       # FileExplorer 富 UI（推荐）
 ├── FileManager.UI.WebApi         # REST API
 └── FileManager.UI.WebApi.Sdk     # HTTP 客户端 SDK
-Samples/                          # 可运行的示例项目
-├── FileManagerTest               # ASP.NET Core 基础示例
-├── FileManagerCore               # 完整示例（含 Swagger）
-└── ConsoleOwinTest               # OWIN 宿主示例
+Samples/                          # 可运行的示例项目（详见 Samples/README.md）
+├── FileManager.Sample.Shared              # 共享存储配置与 UI 挂载
+├── FileManager.Sample.RazorPages.*        # Razor Pages（Minimal / Full）
+├── FileManager.Sample.Mvc.*               # MVC（Minimal / Full）
+├── FileManager.Sample.Blazor.*            # Blazor Server（Minimal / Full）
+└── FileManager.Sample.Owin                # OWIN 宿主示例
 Test/                             # 自动化测试项目
-├── FileManagerSdkTest            # SDK 调用测试
-└── FileManager.UI.Core.Test      # 单元测试
+├── FileManager.Core.Test           # 核心库与 FileProvider 单元测试
+├── FileManager.UI.WebApi.Sdk.Test  # Web API SDK 集成测试
+├── FileManager.Samples.Test        # 示例项目 Smoke Test
+└── FileManager.Storage.*.Test      # 各存储后端单元测试
 ```

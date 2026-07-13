@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>elFinder - FileManager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/jquery-ui.min.css">
+  <link rel="stylesheet" href="css/elfinder.full.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; background: #f5f5f5; font-family: "Segoe UI", Tahoma, sans-serif; }
+    #elfinder { height: 100%; min-height: 600px; }
+    #load-error { display: none; padding: 2rem; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div id="load-error"></div>
+  <div id="elfinder"></div>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/jquery-ui.min.js"></script>
+  <script src="js/elfinder.min.js"></script>
+  <script>
+    $(function () {
+      if (!window.jQuery || !$.fn.elfinder) {
+        document.getElementById('load-error').style.display = 'block';
+        document.getElementById('load-error').textContent =
+          'elFinder 前端资源加载失败。请确认 /ElFinder/js、/ElFinder/css、/ElFinder/img 可访问，然后刷新页面。';
+        return;
+      }
+
+      var base = window.location.pathname.replace(/\/?$/, '/');
+      $('#elfinder').elfinder({
+        url: base + 'connector',
+        baseUrl: base,
+        lang: 'en',
+        height: '100%',
+        requestType: 'get',
+        enableAlways: true
+      });
+    });
+  </script>
+</body>
+</html>

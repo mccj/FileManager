@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Vue File Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="app.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Vue File Manager</h1>
+      <nav class="breadcrumb">
+        <a href="#" @click.prevent="load('')">Root</a>
+        <template v-for="(part, index) in breadcrumb" :key="index">
+          / <a href="#" @click.prevent="load(part.path)">{{ part.name }}</a>
+        </template>
+      </nav>
+    </header>
+    <section class="toolbar" v-if="canWrite">
+      <button type="button" @click="goUp" :disabled="!currentPath">Up</button>
+      <button type="button" @click="mkdir">New Folder</button>
+      <label class="upload">Upload<input type="file" multiple hidden @change="upload"></label>
+      <button type="button" @click="refresh">Refresh</button>
+    </section>
+    <main>
+      <table>
+        <thead><tr><th>Name</th><th>Size</th><th>Modified (UTC)</th><th v-if="canWrite">Actions</th></tr></thead>
+        <tbody>
+          <tr v-for="entry in entries" :key="entry.path">
+            <td>
+              <a href="#" @click.prevent="open(entry)">{{ entry.isDirectory ? entry.name + '/' : entry.name }}</a>
+            </td>
+            <td>{{ entry.isDirectory ? '-' : formatSize(entry.length) }}</td>
+            <td>{{ entry.modifiedUtc }}</td>
+            <td v-if="canWrite">
+              <button type="button" @click="rename(entry)">Rename</button>
+              <button type="button" @click="remove(entry)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

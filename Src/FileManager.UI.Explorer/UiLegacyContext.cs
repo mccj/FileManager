@@ -35,6 +35,10 @@ namespace FileManager
 
         public Task<string> GetFormValueAsync(string name) => _ctx.GetFormValueAsync(name);
 
+        public Task<string> GetQueryAsync(string name) => _ctx.GetQueryAsync(name);
+
+        public Task<Stream> OpenBodyAsync() => _ctx.OpenRequestBodyAsync();
+
         public string GetQuery(string name) => _ctx.GetQueryAsync(name).GetAwaiter().GetResult();
 
         public async Task<T> GetBodyModelBinderAsync<T>()

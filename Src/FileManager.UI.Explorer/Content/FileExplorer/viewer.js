@@ -5356,11 +5356,11 @@ function renderDocumentViewer(n) {
                             , helper: "dv-resizable-helper"
                         });
     n.type = "html5";
-    n.documentType = "xpz";
+    n.documentType = n.documentType || "xpz";
     n.enableReadOnlyMode = !0;
     n.mobileRedirect = !1;
     n.ui = "legacy";
-    n.cacheInfoKey && (n.documentUrl = n.initialDoc = n.handlerUrl + "/DownloadDocument?stateId=" + n.stateId + "&cacheInfoKey=" + n.cacheInfoKey, n.encryption = !0);
+    n.cacheInfoKey && (n.documentUrl = n.initialDoc = n.handlerUrl + "/DownloadDocument?stateId=" + encodeURIComponent(n.stateId) + "&cacheInfoKey=" + encodeURIComponent(n.cacheInfoKey), n.documentType === "xpz" && (n.encryption = !0));
     i = new PortableEngine.WebViewer(n, r);
     t = document.getElementById(i.rcId)
         .contentWindow;

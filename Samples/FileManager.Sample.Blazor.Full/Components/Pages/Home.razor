@@ -1,0 +1,22 @@
+﻿@page "/"
+
+@using FileManager.Sample.Shared
+
+@inject IOptions<SampleStorageOptions> StorageOptions
+
+@inject IOptions<SampleShowcaseOptions> ShowcaseOptions
+
+
+
+<PageTitle>Blazor · Full</PageTitle>
+
+
+
+<SampleHub HostTitle="Blazor · Full"
+
+           StorageProvider="@(StorageOptions.Value.Provider ?? "Physical")"
+
+           ReadOnly="@SampleStorageConfigurator.IsReadOnlyProvider(StorageOptions.Value.Provider)"
+
+           MountMode="@(ShowcaseOptions.Value.MountMode ?? "Lite")" />
+

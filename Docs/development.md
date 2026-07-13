@@ -11,51 +11,57 @@
 ## 解决方案结构
 
 ```
-FileManagerWebUI.sln
-├── Src/                    # 11 个库项目
-├── Samples/                # 3 个示例项目
-└── Test/                   # 2 个测试项目
+FileManager.slnx
+├── Src/                    # 核心库、存储后端、UI 模块
+├── Samples/                # 示例项目（*·Full 默认 Lite 模式挂载 6 种核心 UI）
+└── Test/                   # 单元测试
 ```
 
 ### 构建
 
 ```bash
 cd FileManager
-dotnet build FileManagerWebUI.sln
+dotnet build FileManager.slnx
 ```
 
 ### 运行测试
 
 ```bash
-dotnet test Test/FileManager.UI.Core.Test/FileManager.UI.Core.Test.csproj
+dotnet test FileManager.slnx
 ```
 
 ## 示例项目说明
 
+完整说明见 [Samples/README.md](../Samples/README.md)。
+
 | 项目 | 框架 | 用途 |
 |------|------|------|
-| FileManagerTest | ASP.NET Core | 基础集成示例，FileExplorer UI |
-| FileManagerCore | ASP.NET Core | 完整示例，含 Swagger 和 HealthChecks |
-| ConsoleOwinTest | OWIN | 旧版 OWIN 宿主示例 |
+| FileManager.Sample.*.Minimal | ASP.NET Core | 最小集成：只读 ContentRoot + FileExplorer |
+| FileManager.Sample.*.Full | ASP.NET Core | 完整演示：多 UI、可切换存储、REST API、Swagger |
+| FileManager.Sample.Owin | .NET Framework 4.8 + OWIN | 遗留 OWIN 宿主集成 |
+
+### FileManager.Sample.*.Full 示例要点
+
+- UI：默认 Lite 模式挂载六种核心 UI；`FileManager:Showcase:MountMode=Full` 或 **FullMount** profile 挂载全部
+- 存储：通过 `FileManager:Storage:Provider` 配置切换
+- Launch profile：`Physical`、`ContentRoot`、`WebRoot`、`Compress`、`InMemory`、`MultiDrive`、`FullMount`
+- **Mvc.Full** 支持 `FileManager:Showcase:RequireAuth=true` 演示登录（`/Home/Login`，`demo`/`demo`）
+- 详见 [ui-and-storage.md](../Samples/ui-and-storage.md)
+
+### FileManager.Sample.*.Minimal 示例要点
+
+- 存储：`AddContentRootFileProviderReadOnly()`（只读 ContentRoot）
+- UI：`UseFileExplorerUI()` 挂载在 `/Browser`
+- 适合验证最小 NuGet 引用与 UI 加载
 
 ## 测试项目说明
 
 | 项目 | 框架 | 用途 |
 |------|------|------|
-| FileManagerSdkTest | NUnit | Web API SDK 调用测试 |
-| FileManager.UI.Core.Test | xUnit | 核心库单元测试 |
-
-### FileManagerCore 示例要点
-
-- 存储：`AddRootPhysicalFilePath("/App_Data/Files")`
-- UI：`UseFileExplorerUI()` 挂载在 `/Browser`
-- API 文档：NSwag Swagger UI
-- 健康检查：`/health`
-
-### FileManagerTest 示例要点
-
-- 存储：`AddContentRootFileProviderReadOnly()`（只读 ContentRoot）
-- UI：`UseFileExplorerUI()` 挂载在 `/Browser`
+| FileManager.Core.Test | xUnit | 核心库、权限与 FileProvider 单元测试 |
+| FileManager.UI.WebApi.Sdk.Test | NUnit | Web API SDK 集成测试 |
+| FileManager.Samples.Test | xUnit | 示例项目 Smoke Test |
+| FileManager.Storage.Standard.Test | xUnit | Standard 存储后端单元测试 |
 
 ## 项目打包
 
@@ -98,13 +104,19 @@ namespace FileManager
 
 ### 新增 UI 组件
 
-1. 创建 `FileManager.UI.MyUI` 项目，引用 `FileManager.Core`
-2. 将前端资源设为 `EmbeddedResource`
-3. 使用 AspNetCoreDashboard 的 `RouteCollection` 注册路由
-4. 添加 `UseMyUI(this FileManagerOptions app)` 扩展方法
-5. 在路由处理器中通过 `applicationServices.GetService<IFileStore>()` 获取存储
+轻量 REST 界面（HTML/JS + `MapRestFileApi()`）优先使用 **`FileManager.UI.RestShell`**，通过主题区分外观，无需再复制独立包：
 
-参考实现：`Src/FileManager.UI.Explorer/ApplicationBuilderExtensions.cs`
+```csharp
+// 推荐：统一 RestShell + 主题
+app.UseFileManagerUI("/Vue", f => f.UseRestShellFileManagerUI("vue"));
+
+// 兼容：旧扩展方法仍可用，内部路由到 RestShell
+app.UseFileManagerUI("/Vue", f => f.UseVueFileManagerUI());
+```
+
+引用 `FileManager.UI.RestShell`（*·Full 示例已用此包替代 `FileManager.UI.Spa` / `.Vue` / `.React` 等 16 个重复包）。
+
+功能完整或专用 UI（Explorer、RichFilemanager、elFinder、FilePicker、TinyMCE 等）仍使用独立项目。参考：`Src/FileManager.UI.RestShell/`、`Src/FileManager.UI.Explorer/ApplicationBuilderExtensions.cs`
 
 ### 自定义权限
 
@@ -134,12 +146,11 @@ services.AddFileManager(f => f
 
 | 区域 | 限制 |
 |------|------|
-| FileExplorer | 目录复制、ZIP 打包/解压未实现 |
-| FileExplorer | DocumentViewer 使用硬编码演示数据 |
-| CompressStore | 只读，每次操作需重置流位置 |
-| Azure Blob | `BlobFileStore` 未完成 |
-| RichFilemanager | 已弃用，`_fileManager` 提供者未完全接入 |
-| Web API | `GetListFilesAsync` 使用 `.Result` 同步等待，不适合大文件 |
+| FileExplorer | DocumentViewer PDF 转换仍返回原始文件流，非真实 PDF 转换 |
+| CompressStore | 只读；首次访问会建立压缩包索引，大归档仍建议只用于浏览 |
+| Azure Blob | 尚未实现（计划独立 `FileManager.Storage.AzureBlob` 包） |
+| 认证 | 生产环境需自行配置 `AddAuthentication` / `[Authorize]`；默认权限为只读 |
+| Web API | `GetListFilesAsync` 返回元数据列表（最多 100 项），不再加载全部文件字节 |
 
 ## 外部依赖
 

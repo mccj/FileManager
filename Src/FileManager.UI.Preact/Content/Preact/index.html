@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Preact File Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="app.css">
+  
+</head>
+<body>
+  <header><h1>Preact File Manager</h1><nav id="breadcrumb" class="breadcrumb"></nav></header>
+  <section class="toolbar">
+    <button type="button" id="btn-up" data-i18n="up">Up</button>
+    <button type="button" id="btn-mkdir" data-i18n="mkdir">New Folder</button>
+    <label class="upload" data-i18n="upload">Upload<input id="file-input" type="file" multiple hidden></label>
+    <button type="button" id="btn-refresh" data-i18n="refresh">Refresh</button>
+    
+  </section>
+  
+  <main>
+    <table id="file-table" class="table table-hover">
+      <thead><tr><th data-i18n="name">Name</th><th data-i18n="size">Size</th><th data-i18n="modified">Modified (UTC)</th><th data-i18n="actions">Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

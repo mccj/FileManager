@@ -1,12 +1,15 @@
-//using Microsoft.AspNetCore.Http;
+using FileManager.FileStorage;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 #if !NETFULL
-//using Microsoft.AspNetCore.StaticFiles;
-#else
+using Microsoft.AspNetCore.Http;
 #endif
+
 namespace FileManager
 {
     public class FileManagerController
@@ -14,198 +17,207 @@ namespace FileManager
         private readonly IFileManagerProvider _fileManager;
         private readonly FileExtensionContentTypeProvider fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
 
-        public FileManagerController(FileStorage.IFileStore fileStore)
+        public FileManagerController(IFileStore fileStore, DefaultPermissionHandle permissions = null)
         {
             if (fileStore == null)
                 throw new ArgumentNullException(nameof(fileStore));
-            _fileManager = new FileManagerProvider(fileStore);
+            _fileManager = new FileManagerProvider(fileStore, permissions);
         }
 
-        public ActionResult Index(string mode, string path, string name,
-
+        public async Task<ActionResult> IndexAsync(
+            string mode,
+            string path,
+            string name,
 #if !NETFULL
-           IEnumerable<Microsoft.AspNetCore.Http.IFormFile> files,
+            IEnumerable<IFormFile> files,
 #else
-           /*IEnumerable<IFormFile> files,*/
+            IEnumerable<object> files,
 #endif
-            string old, string @new, string source, string target, string content, bool thumbnail, string @string)
+            string old,
+            string @new,
+            string source,
+            string target,
+            string content,
+            bool thumbnail,
+            string @string,
+            CancellationToken cancellationToken = default)
         {
             try
             {
                 if (mode == null)
-                {
                     return null;
-                }
 
-                if (!string.IsNullOrWhiteSpace(path) && path.StartsWith("/"))
-                    path = path.Substring(1);
-                if (!string.IsNullOrWhiteSpace(@new) && @new.StartsWith("/"))
-                    @new = @new == "/" ? string.Empty : @new.Substring(1);
-                if (!string.IsNullOrWhiteSpace(source) && source.StartsWith("/"))
-                    source = source.Substring(1);
-                if (!string.IsNullOrWhiteSpace(target) && target.StartsWith("/"))
-                    target = target.Substring(1);
+                path = TrimLeadingSlash(path);
+                @new = TrimLeadingSlash(@new);
+                source = TrimLeadingSlash(source);
+                target = TrimLeadingSlash(target);
 
-
-                switch (mode.ToLower(CultureInfo.CurrentCulture))
+                switch (mode.ToLower(CultureInfo.InvariantCulture))
                 {
                     case "initiate":
-                        return Json(_fileManager.Initiate());
+                        return Json(await _fileManager.InitiateAsync(cancellationToken));
                     case "getinfo":
-                        return Json(_fileManager.GetInfo(path));
+                        return Json(await _fileManager.GetInfoAsync(path, cancellationToken));
                     case "readfolder":
-                        return Json(_fileManager.ReadFolder(path));
+                        return Json(await _fileManager.ReadFolderAsync(path, cancellationToken));
                     case "addfolder":
-                        return Json(_fileManager.AddFolder(path, name));
+                        return Json(await _fileManager.AddFolderAsync(path, name, cancellationToken));
 #if !NETFULL
                     case "upload":
-                        return Json(_fileManager.Upload(path, files).Result);
-#else
-                    //case "upload":
-                    //    return Json(_fileManager.Upload(path, files).Result);
+                        return Json(await _fileManager.UploadAsync(path, files, cancellationToken));
 #endif
                     case "rename":
-                        return Json(_fileManager.Rename(old, @new));
+                        return Json(await _fileManager.RenameAsync(old, @new, cancellationToken));
                     case "move":
-                        return Json(_fileManager.Move(old, @new));
+                        return Json(await _fileManager.MoveAsync(old, @new, cancellationToken));
                     case "copy":
-                        return Json(_fileManager.Copy(source, target));
+                        return Json(await _fileManager.CopyAsync(source, target, cancellationToken));
                     case "savefile":
-                        return Json(_fileManager.SaveFile(path, content));
+                        return Json(await _fileManager.SaveFileAsync(path, content, cancellationToken));
                     case "delete":
-                        return Json(_fileManager.Delete(path));
+                        return Json(await _fileManager.DeleteAsync(path, cancellationToken));
                     case "download":
-                        return this.Download(path);
+                        return await DownloadAsync(path, cancellationToken);
                     case "getimage":
-                        return this.GetImage(path, thumbnail);
+                        return await GetImageAsync(path, thumbnail, cancellationToken);
                     case "readfile":
-                        return this.ReadFile(path);
+                        return await ReadFileAsync(path, cancellationToken);
                     case "summarize":
-                        return Json(_fileManager.Summarize());
+                        return Json(await _fileManager.SummarizeAsync(cancellationToken));
                     case "seekfolder":
-                        return Json(_fileManager.SeekFolder(path, @string));
+                        return Json(await _fileManager.SeekFolderAsync(path, @string, cancellationToken));
                 }
 
-                throw new Exception("Unknown Request!");
+                throw new InvalidOperationException("Unknown request mode.");
             }
-            catch (Exception e)
+            catch (FileStoreException ex)
             {
-                // returns all unhandeled exceptions and returns them in JSON format with 500.
-                // Issue #314
-                return new JsonResult(e.Message, contentType: "application/json")
-                {
-                    StatusCode = 500
-                    //StatusCode = Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError,
-                };
+                return new JsonResult(ex.Message, contentType: "application/json") { StatusCode = 400 };
+            }
+            catch (Exception)
+            {
+                return new JsonResult("An unexpected error occurred.", contentType: "application/json") { StatusCode = 500 };
             }
         }
-        private FileResult ReadFile(string path)
-        {
-            var fileName = System.IO.Path.GetFileName(path);
-            byte[] fileBytes = _fileManager.ReadFile(path);
 
-            var cd = new System.Net.Mime.ContentDisposition
+        private async Task<FileResult> ReadFileAsync(string path, CancellationToken cancellationToken)
+        {
+            var fileName = Path.GetFileName(path);
+            var stream = await _fileManager.OpenReadAsync(path, cancellationToken);
+            var contentType = GetMimeMapping(fileName);
+            return new FileResult(stream, contentType)
             {
-                Inline = true,
-                FileName = fileName
+                ContentDisposition = new System.Net.Mime.ContentDisposition { Inline = true, FileName = fileName }
             };
-            //Response.Headers.Add("Content-Disposition", cd.ToString());
-            var contentType = getMimeMapping(fileName);
-            return new FileResult(fileBytes, contentType) { ContentDisposition = cd };
         }
-        private FileResult Download(string path)
-        {
-            var fileName = System.IO.Path.GetFileName(path);
-            byte[] fileBytes = _fileManager.ReadFile(path);
 
-            return new FileResult(fileBytes, "application/x-msdownload", fileName);
-        }
-        public FileResult GetImage(string path, bool thumbnail)
+        private async Task<FileResult> DownloadAsync(string path, CancellationToken cancellationToken)
         {
-            var fileName = System.IO.Path.GetFileName(path);
-            byte[] fileBytes = _fileManager.GetImage(path, thumbnail);
-
-            var cd = new System.Net.Mime.ContentDisposition
-            {
-                Inline = true,
-                FileName = fileName
-            };
-            //Response.Headers.Add("Content-Disposition", cd.ToString());
-            var contentType = getMimeMapping(fileName);
-            return new FileResult(fileBytes, contentType/*"image/*"*/) { ContentDisposition = cd };
+            var fileName = Path.GetFileName(path);
+            var stream = await _fileManager.OpenReadAsync(path, cancellationToken);
+            return new FileResult(stream, "application/octet-stream", fileName);
         }
-        private string getMimeMapping(string fileName)
+
+        private Task<FileResult> GetImageAsync(string path, bool thumbnail, CancellationToken cancellationToken)
         {
-            var fileExt = System.IO.Path.GetExtension(fileName);
-            if (fileExtensionContentTypeProvider.Mappings.ContainsKey(fileExt))
-                return fileExtensionContentTypeProvider.Mappings[fileExt];
-
-            else
-                return "application/x-msdownload";
+            return ReadFileAsync(path, cancellationToken);
         }
+
+        private static string TrimLeadingSlash(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return value;
+            if (value == "/")
+                return string.Empty;
+            return value.StartsWith("/") ? value.Substring(1) : value;
+        }
+
+        private string GetMimeMapping(string fileName)
+        {
+            var fileExt = Path.GetExtension(fileName);
+            if (fileExtensionContentTypeProvider.Mappings.TryGetValue(fileExt, out var mime))
+                return mime;
+            return "application/octet-stream";
+        }
+
         private JsonResult Json(object dynamic)
         {
-            var value = Newtonsoft.Json.JsonConvert.SerializeObject(dynamic, new Newtonsoft.Json.JsonSerializerSettings
+            var value = JsonConvert.SerializeObject(dynamic, new JsonSerializerSettings
             {
-                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-                Formatting = Newtonsoft.Json.Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented,
                 ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
-                //ContractResolver = new LowercaseContractResolver()
             });
             return new JsonResult(value, contentType: "application/json");
         }
     }
+
     public abstract class ActionResult
     {
         public string ContentType { get; set; }
         public int StatusCode { get; set; } = 200;
         public System.Net.Mime.ContentDisposition ContentDisposition { get; set; }
     }
+
     public class FileResult : ActionResult
     {
         public FileResult(byte[] fileBytes, string contentType, string fileName = null)
         {
-            this.FileBytes = fileBytes;
+            FileBytes = fileBytes;
             if (!string.IsNullOrWhiteSpace(fileName))
-                this.ContentDisposition = new System.Net.Mime.ContentDisposition { FileName = fileName };
-            this.ContentType = contentType;
+                ContentDisposition = new System.Net.Mime.ContentDisposition { FileName = fileName };
+            ContentType = contentType;
         }
-        public byte[] FileBytes { get; set; }
-        //public string FileName { get; set; }
 
+        public FileResult(Stream fileStream, string contentType, string fileName = null)
+        {
+            FileStream = fileStream;
+            if (!string.IsNullOrWhiteSpace(fileName))
+                ContentDisposition = new System.Net.Mime.ContentDisposition { FileName = fileName };
+            ContentType = contentType;
+        }
+
+        public byte[] FileBytes { get; set; }
+        public Stream FileStream { get; set; }
     }
+
     public class JsonResult : ActionResult
     {
         public JsonResult() { }
         public JsonResult(string data, string contentType = "application/json")
         {
-            this.Data = data;
-            this.ContentType = contentType;
+            Data = data;
+            ContentType = contentType;
         }
         public string Data { get; set; }
     }
+
     public class Result<T>
     {
         public T Data { get; set; }
         public List<Error> Errors { get; set; }
     }
+
     public class Error
     {
         public int Code { get; set; }
         public string Title { get; set; }
         public Meta Meta { get; set; }
     }
+
     public class Meta
     {
         public List<string> Arguments { get; set; }
     }
+
     public class ResultInfo
     {
         public string Id { get; set; }
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public InfoType Type { get; set; }
         public Attributes Attributes { get; set; }
     }
+
     public enum InfoType
     {
         initiate,
@@ -213,17 +225,18 @@ namespace FileManager
         file,
         folder
     }
+
     public class Attributes
     {
         public string Name { get; set; }
         public string Path { get; set; }
         public bool? Readable { get; set; }
         public bool? Writable { get; set; }
-        [Newtonsoft.Json.JsonConverter(typeof(UnixTimestampConverter))]
+        [JsonConverter(typeof(UnixTimestampConverter))]
         public DateTime? Created { get; set; }
-        [Newtonsoft.Json.JsonConverter(typeof(UnixTimestampConverter))]
+        [JsonConverter(typeof(UnixTimestampConverter))]
         public DateTime? Modified { get; set; }
-        [Newtonsoft.Json.JsonConverter(typeof(UnixTimestampConverter))]
+        [JsonConverter(typeof(UnixTimestampConverter))]
         public TimeSpan? Timestamp { get; set; }
         public string Extension { get; set; }
         public long? Size { get; set; }
@@ -234,45 +247,51 @@ namespace FileManager
         public int Height { get; set; }
         public int Width { get; set; }
     }
+
     public class Config
     {
         public Security Security { get; set; }
     }
+
     public class Security
     {
         public bool ReadOnly { get; set; }
         public Extensions Extensions { get; set; }
     }
+
     public class Extensions
     {
         public bool IgnoreCase { get; set; }
         public Policy Policy { get; set; }
         public string[] Restrictions { get; set; }
     }
+
     public enum Policy
     {
         ALLOW_LIST,
         DISALLOW_LIST
     }
-    public class UnixTimestampConverter : Newtonsoft.Json.JsonConverter
+
+    public class UnixTimestampConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
             return objectType == typeof(DateTime) || objectType == typeof(TimeSpan);
         }
+
         public override bool CanRead => false;
         public override bool CanWrite => true;
+
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            return existingValue;
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             if (value is DateTime time)
             {
-                var unixTimestamp = GetUnixTimestamp(time);
-                writer.WriteValue(unixTimestamp);
+                writer.WriteValue(GetUnixTimestamp(time));
             }
             else if (value is TimeSpan timeSpan)
             {
@@ -283,9 +302,10 @@ namespace FileManager
                 serializer.Serialize(writer, value);
             }
         }
-        private Int32 GetUnixTimestamp(DateTime dt)
+
+        private static int GetUnixTimestamp(DateTime dt)
         {
-            return (Int32)(dt.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            return (int)(dt.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
         }
     }
 }

@@ -1,0 +1,11 @@
+body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; background: #fff; }
+header { padding: 1rem 1.25rem; border-bottom: 1px solid #e5e7eb; }
+header h1 { margin: 0 0 .25rem; font-size: 1.1rem; }
+.toolbar { display: flex; gap: .5rem; padding: .75rem 1.25rem; background: #f3f4f6; }
+.toolbar button { padding: .4rem .75rem; border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; cursor: pointer; }
+.toolbar button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+.toolbar button:disabled { opacity: .5; cursor: not-allowed; }
+main { padding: 0 1.25rem 1.25rem; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: .55rem .5rem; border-bottom: 1px solid #e5e7eb; text-align: left; }
+td.name { color: #2563eb; cursor: pointer; }

@@ -3133,6 +3133,7 @@ Ext.define("GleamTech.FileUltimate.FileTypeInfo", {
         }
     }
     , documentViewerTypes: {}
+    , textViewerTypes: {}
     , normalizeExtension: function (n) {
         return n.charAt(0) === "." && (n = n.substr(1)), n.toLowerCase()
     }
@@ -3161,6 +3162,9 @@ Ext.define("GleamTech.FileUltimate.FileTypeInfo", {
     , getDocumentViewerType: function (n) {
         var t = this.documentViewerTypes[this.normalizeExtension(n)];
         return t && t.excluded !== !0 ? t : null
+    }
+    , getTextViewerType: function (n) {
+        return this.textViewerTypes[this.normalizeExtension(n)]
     }
 });
 Ext.define("GleamTech.UI.MediaPlayer", {
@@ -3270,6 +3274,7 @@ Ext.define("GleamTech.FileUltimate.FileManager", {
         , imageViewerEnabled: !0
         , mediaPlayerEnabled: !0
         , documentViewerEnabled: !0
+        , textViewerEnabled: !0
         , archiveBrowsingEnabled: !0
         , resourceBasePath: ""
     }
@@ -4675,8 +4680,11 @@ Ext.define("GleamTech.FileUltimate.FileManager", {
     , getDocumentViewerType: function (n) {
         return this.documentViewerEnabled ? GleamTech.FileUltimate.FileTypeInfo.getDocumentViewerType(n) : null
     }
+    , getTextViewerType: function (n) {
+        return this.textViewerEnabled ? GleamTech.FileUltimate.FileTypeInfo.getTextViewerType(n) : null
+    }
     , isPreviewType: function (n) {
-        return (this.getImageViewerType(n) || this.getMediaPlayerType(n) || this.getDocumentViewerType(n)) && !this.excludedExtensionsForPreview[n.toLowerCase()]
+        return (this.getImageViewerType(n) || this.getMediaPlayerType(n) || this.getDocumentViewerType(n) || this.getTextViewerType(n)) && !this.excludedExtensionsForPreview[n.toLowerCase()]
     }
     , setClipboard: function (n, t, i) {
         this.clearClipboard();
@@ -4953,6 +4961,28 @@ Ext.define("GleamTech.FileUltimate.FileManager", {
                             , path: u.fullPath
                             , fileName: r
                             , previewerType: "DocumentViewer"
+                        })
+                    }
+                }]
+            })
+        } else if (this.getTextViewerType(e)) {
+            if (f = this.fireEventEx("previewing", new GleamTech.UI.EventArgs({
+                item: this.getEventItems(n, [t])[0]
+                , previewerType: "TextViewer"
+            })), f === !1) return;
+            this.createChildWindow({
+                childWindowId: "preview-" + GleamTech.Util.Path.combine(u.fullPath, r, GleamTech.Util.Path.backSlash)
+                , title: r + " - Text Viewer"
+                , items: [{
+                    xtype: "box"
+                    , autoEl: {
+                        tag: "iframe"
+                        , frameBorder: "0"
+                        , src: this.getServerHandlerMethodUrl("Preview", {
+                            stateId: this.stateId
+                            , path: u.fullPath
+                            , fileName: r
+                            , previewerType: "TextViewer"
                         })
                     }
                 }]
@@ -14562,4 +14592,53 @@ GleamTech.FileUltimate.FileTypeInfo.documentViewerTypes = {
     , "bmp": {}
     , "wmf": {}
     , "dib": {}
+};
+GleamTech.FileUltimate.FileTypeInfo.textViewerTypes = {
+    "txt": {}
+    , "cs": {}
+    , "csx": {}
+    , "vb": {}
+    , "fs": {}
+    , "fsx": {}
+    , "json": {}
+    , "xml": {}
+    , "xsl": {}
+    , "xslt": {}
+    , "config": {}
+    , "csproj": {}
+    , "vbproj": {}
+    , "fsproj": {}
+    , "props": {}
+    , "targets": {}
+    , "sln": {}
+    , "slnx": {}
+    , "js": {}
+    , "mjs": {}
+    , "ts": {}
+    , "css": {}
+    , "scss": {}
+    , "less": {}
+    , "sql": {}
+    , "yaml": {}
+    , "yml": {}
+    , "ini": {}
+    , "cfg": {}
+    , "env": {}
+    , "razor": {}
+    , "cshtml": {}
+    , "log": {}
+    , "md": {}
+    , "markdown": {}
+    , "sh": {}
+    , "bat": {}
+    , "cmd": {}
+    , "ps1": {}
+    , "py": {}
+    , "java": {}
+    , "go": {}
+    , "rs": {}
+    , "cpp": {}
+    , "c": {}
+    , "h": {}
+    , "hpp": {}
 };

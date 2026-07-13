@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FileManager
 {
     /// <summary>
-    /// 
+    /// 物理路径存储注册扩展。
     /// </summary>
     public static partial class ApplicationBuilderExtensions
     {

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{${title}$}</title>
+    <link rel="stylesheet" href="../Resource/library/highlight/github.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background-color: #fff;
+        }
+
+        #status {
+            padding: 16px;
+            font-family: Segoe UI, sans-serif;
+            color: #666;
+        }
+
+        #codeContainer {
+            display: none;
+            margin: 0;
+            height: 100%;
+            overflow: auto;
+        }
+
+        #codeContainer code {
+            display: block;
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            tab-size: 4;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">Loading...</div>
+    <pre id="codeContainer"><code id="source" class="language-{${language}$}"></code></pre>
+    <script src="../Resource/library/highlight/highlight.min.js"></script>
+    <script src="../Resource/library/highlight/csharp.min.js"></script>
+    <script src="../Resource/library/highlight/vbnet.min.js"></script>
+    <script src="../Resource/library/highlight/fsharp.min.js"></script>
+    <script src="../Resource/library/highlight/xml.min.js"></script>
+    <script src="../Resource/library/highlight/json.min.js"></script>
+    <script src="../Resource/library/highlight/javascript.min.js"></script>
+    <script src="../Resource/library/highlight/typescript.min.js"></script>
+    <script src="../Resource/library/highlight/css.min.js"></script>
+    <script src="../Resource/library/highlight/sql.min.js"></script>
+    <script src="../Resource/library/highlight/yaml.min.js"></script>
+    <script src="../Resource/library/highlight/python.min.js"></script>
+    <script src="../Resource/library/highlight/bash.min.js"></script>
+    <script src="../Resource/library/highlight/markdown.min.js"></script>
+    <script src="../Resource/library/highlight/cpp.min.js"></script>
+    <script src="../Resource/library/highlight/java.min.js"></script>
+    <script src="../Resource/library/highlight/go.min.js"></script>
+    <script src="../Resource/library/highlight/rust.min.js"></script>
+    <script>
+        (function () {
+            var url = "{${texturl}$}";
+            var status = document.getElementById("status");
+            var container = document.getElementById("codeContainer");
+            var code = document.getElementById("source");
+
+            fetch(url, { credentials: "same-origin" })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("HTTP " + response.status);
+                    }
+                    return response.text();
+                })
+                .then(function (text) {
+                    status.style.display = "none";
+                    container.style.display = "block";
+                    code.textContent = text;
+                    if (window.hljs) {
+                        hljs.highlightElement(code);
+                    }
+                })
+                .catch(function (error) {
+                    status.textContent = "Failed to load file: " + error.message;
+                });
+        })();
+    </script>
+</body>
+</html>

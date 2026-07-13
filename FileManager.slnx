@@ -1,0 +1,195 @@
+<Solution>
+
+  <Folder Name="/Solution Items/">
+
+    <File Path="README.md" />
+
+  </Folder>
+
+  <Folder Name="/Src/">
+
+    <Project Path="Src/FileManager.Core/FileManager.Core.csproj" />
+
+    <Project Path="Src/FileManager.Storage.AwsS3/FileManager.Storage.AwsS3.csproj" />
+
+    <Project Path="Src/FileManager.Storage.BackblazeB2/FileManager.Storage.BackblazeB2.csproj" />
+
+    <Project Path="Src/FileManager.Storage.AzureBlob/FileManager.Storage.AzureBlob.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Box/FileManager.Storage.Box.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Composite/FileManager.Storage.Composite.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Cassandra/FileManager.Storage.Cassandra.csproj" />
+
+    <Project Path="Src/FileManager.Storage.CloudflareR2/FileManager.Storage.CloudflareR2.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Compress/FileManager.Storage.Compress.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Dropbox/FileManager.Storage.Dropbox.csproj" />
+
+    <Project Path="Src/FileManager.Storage.DigitalOceanSpaces/FileManager.Storage.DigitalOceanSpaces.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Elasticsearch/FileManager.Storage.Elasticsearch.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Ftp/FileManager.Storage.Ftp.csproj" />
+
+    <Project Path="Src/FileManager.Storage.GoogleDrive/FileManager.Storage.GoogleDrive.csproj" />
+
+    <Project Path="Src/FileManager.Storage.GoogleCloud/FileManager.Storage.GoogleCloud.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Hetzner/FileManager.Storage.Hetzner.csproj" />
+
+    <Project Path="Src/FileManager.Storage.IbmCos/FileManager.Storage.IbmCos.csproj" />
+
+    <Project Path="Src/FileManager.Storage.InMemory/FileManager.Storage.InMemory.csproj" />
+
+    <Project Path="Src/FileManager.Storage.InfluxDb/FileManager.Storage.InfluxDb.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Kafka/FileManager.Storage.Kafka.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Ldap/FileManager.Storage.Ldap.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Memcached/FileManager.Storage.Memcached.csproj" />
+
+    <Project Path="Src/FileManager.Storage.MinIO/FileManager.Storage.MinIO.csproj" />
+
+    <Project Path="Src/FileManager.Storage.MongoDB/FileManager.Storage.MongoDB.csproj" />
+
+    <Project Path="Src/FileManager.Storage.MySqlBlob/FileManager.Storage.MySqlBlob.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Nfs/FileManager.Storage.Nfs.csproj" />
+
+    <Project Path="Src/FileManager.Storage.OneDrive/FileManager.Storage.OneDrive.csproj" />
+
+    <Project Path="Src/FileManager.Storage.OracleObject/FileManager.Storage.OracleObject.csproj" />
+
+    <Project Path="Src/FileManager.Storage.OpenStackSwift/FileManager.Storage.OpenStackSwift.csproj" />
+
+    <Project Path="Src/FileManager.Storage.PostgreSqlBlob/FileManager.Storage.PostgreSqlBlob.csproj" />
+
+    <Project Path="Src/FileManager.Storage.RabbitMq/FileManager.Storage.RabbitMq.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Redis/FileManager.Storage.Redis.csproj" />
+
+    <Project Path="Src/FileManager.Storage.SharePoint/FileManager.Storage.SharePoint.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Smb/FileManager.Storage.Smb.csproj" />
+
+    <Project Path="Src/FileManager.Storage.SqlServerBlob/FileManager.Storage.SqlServerBlob.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Sftp/FileManager.Storage.Sftp.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Scaleway/FileManager.Storage.Scaleway.csproj" />
+
+    <Project Path="Src/FileManager.Storage.SqlBlob/FileManager.Storage.SqlBlob.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Standard/FileManager.Storage.Standard.csproj" />
+
+    <Project Path="Src/FileManager.Storage.Wasabi/FileManager.Storage.Wasabi.csproj" />
+
+    <Project Path="Src/FileManager.Storage.WebDav/FileManager.Storage.WebDav.csproj" />
+
+    <Project Path="Src/FileManager.UI.AdminLTE/FileManager.UI.AdminLTE.csproj" />
+
+    <Project Path="Src/FileManager.UI.Common/FileManager.UI.Common.csproj" />
+
+    <Project Path="Src/FileManager.UI.ElFinder/FileManager.UI.ElFinder.csproj" />
+
+    <Project Path="Src/FileManager.UI.Explorer/FileManager.UI.Explorer.csproj" />
+
+    <Project Path="Src/FileManager.UI.FilePicker/FileManager.UI.FilePicker.csproj" />
+
+    <Project Path="Src/FileManager.UI.React/FileManager.UI.React.csproj" />
+
+    <Project Path="Src/FileManager.UI.Angular/FileManager.UI.Angular.csproj" />
+
+    <Project Path="Src/FileManager.UI.Blazor/FileManager.UI.Blazor.csproj" />
+
+    <Project Path="Src/FileManager.UI.Dropzone/FileManager.UI.Dropzone.csproj" />
+
+    <Project Path="Src/FileManager.UI.MediaLibrary/FileManager.UI.MediaLibrary.csproj" />
+
+    <Project Path="Src/FileManager.UI.Mobile/FileManager.UI.Mobile.csproj" />
+
+    <Project Path="Src/FileManager.UI.Preact/FileManager.UI.Preact.csproj" />
+
+    <Project Path="Src/FileManager.UI.SolidJs/FileManager.UI.SolidJs.csproj" />
+
+    <Project Path="Src/FileManager.UI.CkEditor/FileManager.UI.CkEditor.csproj" />
+
+    <Project Path="Src/FileManager.UI.Bootstrap5/FileManager.UI.Bootstrap5.csproj" />
+
+    <Project Path="Src/FileManager.UI.Pwa/FileManager.UI.Pwa.csproj" />
+
+    <Project Path="Src/FileManager.UI.I18n/FileManager.UI.I18n.csproj" />
+
+    <Project Path="Src/FileManager.UI.RichFilemanager/FileManager.UI.RichFilemanager.csproj" />
+
+    <Project Path="Src/FileManager.UI.Svelte/FileManager.UI.Svelte.csproj" />
+
+    <Project Path="Src/FileManager.UI.NextJs/FileManager.UI.NextJs.csproj" />
+
+    <Project Path="Src/FileManager.UI.TinyMce/FileManager.UI.TinyMce.csproj" />
+
+    <Project Path="Src/FileManager.UI.SdkDemo/FileManager.UI.SdkDemo.csproj" />
+
+    <Project Path="Src/FileManager.UI.Themes/FileManager.UI.Themes.csproj" />
+
+    <Project Path="Src/FileManager.UI.RestShell/FileManager.UI.RestShell.csproj" />
+
+    <Project Path="Src/FileManager.UI.Spa/FileManager.UI.Spa.csproj" />
+
+    <Project Path="Src/FileManager.UI.Vue/FileManager.UI.Vue.csproj" />
+
+    <Project Path="Src/FileManager.UI.WebApi.Sdk/FileManager.UI.WebApi.Sdk.csproj" />
+
+    <Project Path="Src/FileManager.UI.WebApi/FileManager.UI.WebApi.csproj" />
+
+    <Project Path="Src/FileManager.UI/FileManager.UI.csproj" />
+
+  </Folder>
+
+  <Folder Name="/Samples/">
+
+    <File Path="Samples/README.md" />
+
+    <File Path="Samples/ui-and-storage.md" />
+
+    <Project Path="Samples/FileManager.Sample.Shared/FileManager.Sample.Shared.csproj" />
+
+    <Project Path="Samples/FileManager.Sample.RazorPages.Minimal/FileManager.Sample.RazorPages.Minimal.csproj" />
+
+    <Project Path="Samples/FileManager.Sample.RazorPages.Full/FileManager.Sample.RazorPages.Full.csproj" />
+
+    <Project Path="Samples/FileManager.Sample.Mvc.Minimal/FileManager.Sample.Mvc.Minimal.csproj" />
+
+    <Project Path="Samples/FileManager.Sample.Mvc.Full/FileManager.Sample.Mvc.Full.csproj" />
+
+    <Project Path="Samples/FileManager.Sample.Blazor.Minimal/FileManager.Sample.Blazor.Minimal.csproj" />
+
+    <Project Path="Samples/FileManager.Sample.Blazor.Full/FileManager.Sample.Blazor.Full.csproj" />
+
+    <Project Path="Samples/FileManager.Sample.Owin/FileManager.Sample.Owin.csproj" />
+
+  </Folder>
+
+  <Folder Name="/Test/">
+
+    <Project Path="Test/FileManager.Storage.Standard.Test/FileManager.Storage.Standard.Test.csproj" />
+
+    <Project Path="Test/FileManager.Core.Test/FileManager.Core.Test.csproj" />
+
+    <Project Path="Test/FileManager.UI.WebApi.Sdk.Test/FileManager.UI.WebApi.Sdk.Test.csproj" />
+
+    <Project Path="Test/FileManager.Storage.InMemory.Test/FileManager.Storage.InMemory.Test.csproj" />
+
+    <Project Path="Test/FileManager.Storage.Composite.Test/FileManager.Storage.Composite.Test.csproj" />
+
+    <Project Path="Test/FileManager.Storage.SqlBlob.Test/FileManager.Storage.SqlBlob.Test.csproj" />
+
+    <Project Path="Test/FileManager.Samples.Test/FileManager.Samples.Test.csproj" />
+
+  </Folder>
+
+</Solution>

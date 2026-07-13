@@ -1,0 +1,23 @@
+body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; background: #f8fafc; color: #0f172a; }
+header { padding: 1rem 1.5rem; background: var(--fm-accent, #2563eb); color: #fff; }
+header h1 { margin: 0 0 .5rem; font-size: 1.25rem; }
+.breadcrumb a { color: #fff; opacity: .9; text-decoration: none; }
+.toolbar { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem; background: #e2e8f0; align-items: center; }
+.toolbar button, .toolbar .upload, .toolbar select { padding: .4rem .75rem; border: 1px solid #94a3b8; background: #fff; border-radius: 4px; cursor: pointer; }
+main { padding: 1rem 1.5rem; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { padding: .6rem .75rem; border-bottom: 1px solid #e2e8f0; text-align: left; }
+td a { color: #2563eb; text-decoration: none; }
+.api-hint { padding: .75rem 1.5rem; background: #eef2ff; font-family: monospace; }
+.dropzone { margin: 1rem 1.5rem; padding: 2rem; border: 2px dashed #94a3b8; border-radius: 8px; text-align: center; background: #fff; }
+.dropzone.hover { border-color: var(--fm-accent, #2563eb); background: #eff6ff; }
+body.dark { background: #0f172a; color: #e2e8f0; }
+body.dark header { background: #1e293b; }
+body.dark table { background: #1e293b; color: #e2e8f0; }
+body.dark th, body.dark td { border-color: #334155; }
+body.dark .toolbar { background: #334155; }
+body.media-layout main table { display: none; }
+@media (max-width: 640px) {
+  body.mobile-layout .toolbar button, body.mobile-layout .toolbar .upload { flex: 1 1 45%; }
+  body.mobile-layout th:nth-child(3), body.mobile-layout td:nth-child(3) { display: none; }
+}

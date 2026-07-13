@@ -1,0 +1,26 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Blazor · Full</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> 首页
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <a class="nav-link" href="/Browser/">文件管理器</a>
+        </div>
+        <div class="nav-item px-3">
+            <a class="nav-link" href="/swagger/" target="_blank">Swagger</a>
+        </div>
+        <div class="nav-item px-3">
+            <a class="nav-link" href="/health" target="_blank">健康检查</a>
+        </div>
+    </nav>
+</div>

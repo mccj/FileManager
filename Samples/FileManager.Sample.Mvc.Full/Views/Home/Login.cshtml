@@ -1,0 +1,16 @@
+@{
+  ViewData["Title"] = "Demo Login";
+  var returnUrl = ViewBag.ReturnUrl as string ?? "/";
+}
+<h2>Demo Login</h2>
+@if (ViewBag.Error != null)
+{
+  <p style="color:red">@ViewBag.Error</p>
+}
+<form method="post" action="@Url.Action("Login", "Home")">
+  <input type="hidden" name="returnUrl" value="@returnUrl" />
+  <div><label>Username <input name="username" value="demo" /></label></div>
+  <div><label>Password <input name="password" type="password" value="demo" /></label></div>
+  <button type="submit">Sign in</button>
+</form>
+<p>Default demo credentials: <code>demo</code> / <code>demo</code></p>

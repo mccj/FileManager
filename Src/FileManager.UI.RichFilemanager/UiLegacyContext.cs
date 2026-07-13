@@ -34,7 +34,9 @@ namespace FileManager
 
         public Task<string> GetFormValueAsync(string name) => _ctx.GetFormValueAsync(name);
 
-        public string GetQuery(string name) => _ctx.GetQueryAsync(name).GetAwaiter().GetResult();
+        public Task<string> GetQueryAsync(string name) => _ctx.GetQueryAsync(name);
+
+        public string GetQuery(string name) => GetQueryAsync(name).GetAwaiter().GetResult();
 
         public async Task<T> GetBodyModelBinderAsync<T>()
         {
@@ -88,6 +90,9 @@ namespace FileManager
 
         public Task WriteAsync(object data) => _ctx.WriteAsync(data?.ToString() ?? string.Empty, _contentType ?? "text/plain");
 
+        public Task WriteAsync(Stream stream) =>
+            _ctx.WriteStreamAsync(stream, _contentType ?? "application/octet-stream");
+
         public Task WriteAsync(byte[] content)
         {
             if (content == null || content.Length == 0)
@@ -124,10 +129,21 @@ namespace FileManager
         public string Name => "files";
         public string FileName => _file.FileName;
 
-        public void CopyTo(Stream target) => _file.OpenReadStreamAsync().GetAwaiter().GetResult().CopyTo(target);
-        public Task CopyToAsync(Stream target, System.Threading.CancellationToken cancellationToken = default) =>
-            _file.OpenReadStreamAsync().ContinueWith(t => t.Result.CopyToAsync(target, 81920, cancellationToken)).Unwrap();
-        public Stream OpenReadStream() => _file.OpenReadStreamAsync().GetAwaiter().GetResult();
+        public async Task CopyToAsync(Stream target, CancellationToken cancellationToken = default)
+        {
+            await using var stream = await _file.OpenReadStreamAsync();
+            await stream.CopyToAsync(target, 81920, cancellationToken);
+        }
+
+        public async Task CopyTo(Stream target)
+        {
+            await using var stream = await _file.OpenReadStreamAsync();
+            await stream.CopyToAsync(target);
+        }
+
+        public async Task<Stream> OpenReadStreamAsync() => await _file.OpenReadStreamAsync();
+
+        public Stream OpenReadStream() => OpenReadStreamAsync().GetAwaiter().GetResult();
     }
 #endif
 }

@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>FileManager.Sample.Mvc.Full</RootNamespace>
+    <AssemblyName>FileManager.Sample.Mvc.Full</AssemblyName>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FileManager.Samples.Test" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="App_Data\**" />
+    <Content Remove="App_Data\**" />
+    <EmbeddedResource Remove="App_Data\**" />
+    <None Remove="App_Data\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NSwag.AspNetCore" Version="14.7.1" />
+    <PackageReference Include="NSwag.CodeGeneration.CSharp" Version="14.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\FileManager.Sample.Shared\appsettings.storage.full.json" Link="appsettings.storage.full.json" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="..\FileManager.Sample.Shared\FileManager.Sample.Shared.csproj" />
+    <ProjectReference Include="..\..\Src\FileManager.UI.WebApi\FileManager.UI.WebApi.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,2 @@
+.content-wrapper { min-height: calc(100vh - 57px); }
+.table td.name { cursor: pointer; color: #007bff; }

@@ -8,7 +8,6 @@ namespace FileManager.FileStorage
 {
     public interface IPermissions
     {
-        //Task<Permission> GetFilePermissionAsync(string path);
         Task<Permission> GetPermissionAsync(IFileStoreEntry fileStoreEntry);
     }
     public class DefaultPermissions : IPermissions
@@ -19,11 +18,6 @@ namespace FileManager.FileStorage
         {
             this._func = func;
         }
-
-        //public Task<Permission> GetFilePermissionAsync(string path)
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         public Task<Permission> GetPermissionAsync(IFileStoreEntry fileStoreEntry)
         {
@@ -39,23 +33,18 @@ namespace FileManager.FileStorage
         {
             this._permissions = permissions;
         }
-        public Task<Permission> GetPermissionAsync(IFileStoreEntry fileStoreEntry)
+        public async Task<Permission> GetPermissionAsync(IFileStoreEntry fileStoreEntry)
         {
-            if (_permissions.Any()) { 
-            var r = _permissions.Select(async f => await f.GetPermissionAsync(fileStoreEntry));
-            return Task.Run(() =>
+            if (_permissions.Any())
             {
-                return (Permission)r.Sum(f => (int)f.Result);
-            });
+                var results = await Task.WhenAll(_permissions.Select(f => f.GetPermissionAsync(fileStoreEntry)));
+                Permission combined = 0;
+                foreach (var permission in results)
+                    combined |= permission;
+                return combined;
             }
-            else
-            {
-                //var read = Permission.ListSubFolders | Permission.ListFiles | Permission.Download | Permission.Copy | Permission.Preview | Permission.Print;
-                var full = Permission.ListSubFolders | Permission.ListFiles | Permission.Download | Permission.Copy | Permission.Preview | Permission.Print
-                    | Permission.Create | Permission.Delete | Permission.Rename | Permission.Edit | Permission.Upload | Permission.Compress | Permission.Extract | Permission.Cut | Permission.Paste | Permission.CreatePublicLink;
 
-                return Task.FromResult(full);
-            }
+            return PermissionDefaults.ReadOnly;
         }
     }
 }

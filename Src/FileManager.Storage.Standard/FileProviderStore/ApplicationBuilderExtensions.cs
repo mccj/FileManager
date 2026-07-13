@@ -1,10 +1,10 @@
-﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
 
 namespace FileManager
 {
     /// <summary>
-    /// 
+    /// IFileProvider 适配为只读存储的注册扩展。
     /// </summary>
     public static partial class ApplicationBuilderExtensions
     {
@@ -17,14 +17,16 @@ namespace FileManager
 
             return app;
         }
+        /// <summary>注册 ASP.NET Core WebRoot 为只读存储。</summary>
         public static FileServicesOptions AddWebRootFileProviderReadOnly(this FileServicesOptions app)
         {
             return AddFileProviderReadOnly(app, sp =>
             {
-                var env = sp.GetService<Microsoft.AspNetCore.Hosting.IHostingEnvironment>();
-                return env.WebRootFileProvider;
+                var legacyEnv = sp.GetService<IHostingEnvironment>();
+                return legacyEnv?.WebRootFileProvider;
             });
         }
+        /// <summary>注册物理路径为只读存储。</summary>
         public static FileServicesOptions AddFileProviderPhysicalPathReadOnly(this FileServicesOptions app, System.Func<System.IServiceProvider, string> func)
         {
             return AddFileProviderReadOnly(app, sp =>
@@ -34,12 +36,13 @@ namespace FileManager
                 return fileProvider;
             });
         }
+        /// <summary>注册 ASP.NET Core ContentRoot 为只读存储。</summary>
         public static FileServicesOptions AddContentRootFileProviderReadOnly(this FileServicesOptions app)
         {
             return AddFileProviderReadOnly(app, sp =>
             {
-                var env = sp.GetService<Microsoft.AspNetCore.Hosting.IHostingEnvironment>();
-                return env.ContentRootFileProvider;
+                var legacyEnv = sp.GetService<IHostingEnvironment>();
+                return legacyEnv?.ContentRootFileProvider;
             });
         }
         public static FileServicesOptions AddFileProviderReadOnly(this FileServicesOptions app, Microsoft.Extensions.FileProviders.IFileProvider fileProvider)
@@ -54,10 +57,11 @@ namespace FileManager
         {
             return AddFileProviderPhysicalPathReadOnly(app, sp =>
             {
-                var env = sp.GetService<Microsoft.AspNetCore.Hosting.IHostingEnvironment>();
-                return env.ContentRootPath + path;
+                var legacyEnv = sp.GetService<IHostingEnvironment>();
+                return legacyEnv?.ContentRootPath + path;
             });
         }
+        /// <summary>注册物理路径为只读存储。</summary>
         public static FileServicesOptions AddFileProviderPhysicalPathReadOnly(this FileServicesOptions app, string path)
         {
             return AddFileProviderPhysicalPathReadOnly(app, sp =>

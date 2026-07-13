@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SPA File Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header>
+    <h1>SPA File Manager</h1>
+    <div id="breadcrumb"></div>
+  </header>
+  <section class="toolbar">
+    <button id="btn-up" type="button">Up</button>
+    <button id="btn-mkdir" type="button">New Folder</button>
+    <label class="upload">
+      Upload
+      <input id="file-input" type="file" multiple hidden>
+    </label>
+    <button id="btn-refresh" type="button">Refresh</button>
+  </section>
+  <main>
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Size</th><th>Modified (UTC)</th><th></th></tr>
+      </thead>
+      <tbody id="entries"></tbody>
+    </table>
+  </main>
+  <template id="row-template">
+    <tr>
+      <td class="name"></td>
+      <td class="size"></td>
+      <td class="modified"></td>
+      <td class="actions"></td>
+    </tr>
+  </template>
+  <script src="app.js"></script>
+</body>
+</html>
